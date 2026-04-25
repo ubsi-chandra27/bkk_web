@@ -380,6 +380,9 @@ $jenisBerkas = $jenisBerkas ?? [];
                                     'skck' => 'bi-shield-check',
                                 ];
                                 $kode = $info['kode'] ?? '';
+                                if ($kode === 'surat_lamaran') {
+                                    continue;
+                                }
                                 $item = $berkas[$kode] ?? null;
                                 ?>
 

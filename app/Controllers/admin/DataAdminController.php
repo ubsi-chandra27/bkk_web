@@ -17,13 +17,28 @@ class DataAdminController extends BaseController
         $roleModel = new RoleModel();
         $perusahaanModel = new PerusahaanModel();
 
-        $data['admins'] = $userModel->getAdmin();
-        $data['roles']  = $roleModel
-            ->whereIn('id', [1, 2, 3])
-            ->findAll();
+        $admins = $userModel->getAdmin();
+        // Jika admin BKK (role 2), sembunyikan super admin (role 1)
+        if (session()->get('id_role') == 2) {
+            $admins = array_filter($admins, function($admin) {
+                return $admin['id_role'] != 1;
+            });
+        }
+        $data['admins'] = $admins;
+        
+        // Jika admin BKK, sembunyikan opsi super admin di dropdown
+        if (session()->get('id_role') == 2) {
+            $data['roles']  = $roleModel
+                ->whereIn('id', [2, 3])
+                ->findAll();
+        } else {
+            $data['roles']  = $roleModel
+                ->whereIn('id', [1, 2, 3])
+                ->findAll();
+        }
+        
         $data['perusahaan'] = $perusahaanModel->where('id_user IS NULL', null, false)->findAll();
         $data['semua_perusahaan'] = $perusahaanModel->findall();
-
 
         return view('admin/data_admin/index', $data);
     }

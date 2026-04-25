@@ -34,9 +34,11 @@
                                 <a class="nav-link text-active-primary me-6" data-bs-toggle="tab" href="#edit_tracer">Tracer Alumni</a>
                             </li>
                         <?php endif ?>
-                        <li class="nav-item">
-                            <a class="nav-link text-active-primary me-6" data-bs-toggle="tab" href="#edit_berkas">Berkas</a>
-                        </li>
+                        <?php if (session()->get('id_role') != 2): ?>
+                            <li class="nav-item">
+                                <a class="nav-link text-active-primary me-6" data-bs-toggle="tab" href="#edit_berkas">Berkas</a>
+                            </li>
+                        <?php endif ?>
                     </ul>
                     <a href="<?= site_url('admin/data-pelamar/profil/' . $user['id']) ?>" class="btn btn-sm btn-light">
                         &larr; Kembali
@@ -351,73 +353,75 @@
                 <?php endif ?>
             </div>
 
-            <!-- Tab Berkas -->
-            <div class="tab-pane fade" id="edit_berkas">
-                <div class="card shadow-sm">
-                    <div class="card-header border-bottom pt-2">
-                        <h3 class="card-title fw-bolder">Berkas Dokumen</h3>
-                    </div>
-                    <div class="card-body pt-10">
-                        <div class="list-group list-group-flush">
-                            <?php
-                            $iconMap = [
-                                'cv' => 'bi-file-person',
-                                'surat_lamaran' => 'bi-file-earmark-text',
-                                'ijazah' => 'bi-award',
-                                'ktp' => 'bi-card-image',
-                                'skck' => 'bi-shield-check',
-                            ];
-                            foreach (($jenisBerkas ?? []) as $index => $info):
-                                $warna = ['primary', 'warning', 'success', 'info', 'danger'][$index % 5];
-                                $kode = $info['kode'] ?? '';
-                                if ($kode === 'surat_lamaran') {
-                                    continue;
-                                }
-                                $item = $berkas[$kode] ?? null;
-                            ?>
-                                <div class="list-group-item p-4 mb-3">
-                                    <div class="row align-items-center">
+            <?php if (session()->get('id_role') != 2): ?>
+                <!-- Tab Berkas -->
+                <div class="tab-pane fade" id="edit_berkas">
+                    <div class="card shadow-sm">
+                        <div class="card-header border-bottom pt-2">
+                            <h3 class="card-title fw-bolder">Berkas Dokumen</h3>
+                        </div>
+                        <div class="card-body pt-10">
+                            <div class="list-group list-group-flush">
+                                <?php
+                                $iconMap = [
+                                    'cv' => 'bi-file-person',
+                                    'surat_lamaran' => 'bi-file-earmark-text',
+                                    'ijazah' => 'bi-award',
+                                    'ktp' => 'bi-card-image',
+                                    'skck' => 'bi-shield-check',
+                                ];
+                                foreach (($jenisBerkas ?? []) as $index => $info):
+                                    $warna = ['primary', 'warning', 'success', 'info', 'danger'][$index % 5];
+                                    $kode = $info['kode'] ?? '';
+                                    if ($kode === 'surat_lamaran') {
+                                        continue;
+                                    }
+                                    $item = $berkas[$kode] ?? null;
+                                ?>
+                                    <div class="list-group-item p-4 mb-3">
+                                        <div class="row align-items-center">
 
-                                        <div class="col-md-5 d-flex align-items-center gap-3">
-                                            <div class="symbol symbol-40px">
-                                                <span class="symbol-label bg-light-<?= $warna ?>">
-                                                    <i class="bi <?= esc($iconMap[$kode] ?? 'bi-file-earmark') ?> text-<?= $warna ?>"></i>
+                                            <div class="col-md-5 d-flex align-items-center gap-3">
+                                                <div class="symbol symbol-40px">
+                                                    <span class="symbol-label bg-light-<?= $warna ?>">
+                                                        <i class="bi <?= esc($iconMap[$kode] ?? 'bi-file-earmark') ?> text-<?= $warna ?>"></i>
+                                                    </span>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="fw-bolder"><?= esc($info['nama_berkas']) ?></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3 text-md-center mt-3 mt-md-0">
+                                                <span class="badge badge-light-<?= $item ? 'success' : 'secondary' ?>">
+                                                    <?= $item ? 'Sudah upload' : 'Belum upload' ?>
                                                 </span>
                                             </div>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <div class="fw-bolder"><?= esc($info['nama_berkas']) ?></div>
+
+                                            <div class="col-md-4 d-flex justify-content-md-end align-items-center gap-2 mt-3 mt-md-0">
+                                                <?php if ($item): ?>
+                                                    <a href="<?= base_url($item['path_file']) ?>" target="_blank" class="btn btn-sm btn-light-success">
+                                                        Lihat
+                                                    </a>
+                                                <?php endif ?>
+
+                                                <form action="<?= site_url('admin/data-pelamar/profil/' . $user['id'] . '/upload-berkas') ?>" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
+                                                    <?= csrf_field() ?>
+                                                    <input type="hidden" name="id_jenis_berkas" value="<?= esc($info['id']) ?>">
+                                                    <input type="file" name="berkas" class="form-control form-control-sm" required>
+                                                    <button type="submit" class="btn btn-sm btn-<?= $warna ?>">
+                                                        <?= $item ? 'Ubah' : 'Upload' ?>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </div>
-
-                                        <div class="col-md-3 text-md-center mt-3 mt-md-0">
-                                            <span class="badge badge-light-<?= $item ? 'success' : 'secondary' ?>">
-                                                <?= $item ? 'Sudah upload' : 'Belum upload' ?>
-                                            </span>
-                                        </div>
-
-                                        <div class="col-md-4 d-flex justify-content-md-end align-items-center gap-2 mt-3 mt-md-0">
-                                            <?php if ($item): ?>
-                                                <a href="<?= base_url($item['path_file']) ?>" target="_blank" class="btn btn-sm btn-light-success">
-                                                    Lihat
-                                                </a>
-                                            <?php endif ?>
-
-                                            <form action="<?= site_url('admin/data-pelamar/profil/' . $user['id'] . '/upload-berkas') ?>" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
-                                                <?= csrf_field() ?>
-                                                <input type="hidden" name="id_jenis_berkas" value="<?= esc($info['id']) ?>">
-                                                <input type="file" name="berkas" class="form-control form-control-sm" required>
-                                                <button type="submit" class="btn btn-sm btn-<?= $warna ?>">
-                                                    <?= $item ? 'Ubah' : 'Upload' ?>
-                                                </button>
-                                            </form>
-                                        </div>
                                     </div>
-                                </div>
-                            <?php endforeach ?>
+                                <?php endforeach ?>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            <?php endif ?>
         </div>
     </div>
 </div>

@@ -63,6 +63,11 @@ class DataLamaranController extends BaseController
             return redirect()->back()->with('error', 'Data lamaran tidak ditemukan');
         }
 
+        // Admin BKK (role 2) tidak boleh ubah status lamaran
+        if (session()->get('id_role') == 2) {
+            return redirect()->back()->with('error', 'Admin BKK tidak memiliki akses untuk mengubah status lamaran');
+        }
+
         $rules = [
             'status' => 'required|in_list[menunggu,menunggu_diverifikasi,disetujui,lolos_verifikasi,wawancara,tidak_lolos,diverifikasi,diproses,lolos verifikasi,tidak lolos]',
             'catatan' => 'permit_empty|string|max_length[500]'

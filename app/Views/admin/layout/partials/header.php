@@ -26,6 +26,16 @@
 
             <div class="d-flex align-items-stretch flex-shrink-0">
 
+                <!-- Theme toggle -->
+                <div class="d-flex align-items-center ms-1 ms-lg-3">
+                    <button type="button"
+                        class="btn btn-icon btn-active-light-primary w-30px h-30px w-md-40px h-md-40px"
+                        data-theme-toggle-button
+                        aria-pressed="false"
+                        title="Ganti theme">
+                        <i class="fas fa-moon fs-2" data-theme-toggle-icon></i>
+                    </button>
+                </div>
 
                 <!-- Notifikasi -->
                 <div class="d-flex align-items-center ms-1 ms-lg-3">
@@ -95,6 +105,12 @@
                         <!-- Pengaturan -->
                         <div class="menu-item px-5">
                             <a href="<?= site_url('admin/pengaturan') ?>" class="menu-link px-5">Pengaturan</a>
+                        </div>
+
+                        <div class="menu-item px-5">
+                            <button type="button" class="menu-link px-5 w-100 border-0 bg-transparent text-start" data-theme-toggle-button aria-pressed="false">
+                                <span class="menu-title" data-theme-toggle-label>Light Mode</span>
+                            </button>
                         </div>
 
                         <div class="separator my-2"></div>

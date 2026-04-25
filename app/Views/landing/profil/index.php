@@ -446,36 +446,39 @@ if ($statusPendaftaran === 'terdaftar') {
                     </div>
                 </div>
                 <div class="card-body p-9">
-                        <div class="row g-6">
-                            <?php
-                            $iconMap = [
-                                'cv' => 'bi-file-person',
-                                'ktp' => 'bi-card-image',
-                                'ijazah' => 'bi-award',
-                                'surat_lamaran' => 'bi-envelope-paper',
-                                'skck' => 'bi-shield-check',
-                            ];
-                            foreach (($jenisBerkas ?? []) as $index => $info):
-                                $warna = ['primary', 'info', 'success', 'warning', 'danger'][$index % 5];
-                                $kode = $info['kode'] ?? '';
-                                $sudahUpload = isset($berkas[$kode]);
-                            ?>
-                                <div class="col-md-6">
-                                    <div class="card card-bordered">
+                    <div class="row g-6">
+                        <?php
+                        $iconMap = [
+                            'cv' => 'bi-file-person',
+                            'ktp' => 'bi-card-image',
+                            'ijazah' => 'bi-award',
+                            'surat_lamaran' => 'bi-envelope-paper',
+                            'skck' => 'bi-shield-check',
+                        ];
+                        foreach (($jenisBerkas ?? []) as $index => $info):
+                            $warna = ['primary', 'info', 'success', 'warning', 'danger'][$index % 5];
+                            $kode = $info['kode'] ?? '';
+                            if ($kode === 'surat_lamaran') {
+                                continue;
+                            }
+                            $sudahUpload = isset($berkas[$kode]);
+                        ?>
+                            <div class="col-md-6">
+                                <div class="card card-bordered">
                                     <div class="card-body p-6">
 
                                         <!-- Header berkas -->
                                         <div class="d-flex align-items-center justify-content-between mb-4">
-                                                <div class="d-flex align-items-center gap-3">
-                                                    <div class="symbol symbol-40px">
-                                                        <span class="symbol-label bg-light-<?= $warna ?>">
-                                                            <i class="bi <?= esc($iconMap[$kode] ?? 'bi-file-earmark') ?> text-<?= $warna ?> fs-4"></i>
-                                                        </span>
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-bold fs-6"><?= esc($info['nama_berkas']) ?></div>
-                                                    </div>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="symbol symbol-40px">
+                                                    <span class="symbol-label bg-light-<?= $warna ?>">
+                                                        <i class="bi <?= esc($iconMap[$kode] ?? 'bi-file-earmark') ?> text-<?= $warna ?> fs-4"></i>
+                                                    </span>
                                                 </div>
+                                                <div>
+                                                    <div class="fw-bold fs-6"><?= esc($info['nama_berkas']) ?></div>
+                                                </div>
+                                            </div>
                                             <?php if ($sudahUpload): ?>
                                                 <span class="badge badge-light-success">
                                                     <i class="bi bi-check2 me-1"></i>Terupload
@@ -489,13 +492,13 @@ if ($statusPendaftaran === 'terdaftar') {
                                         <?php if ($sudahUpload): ?>
                                             <div class="d-flex align-items-center justify-content-between mb-4">
                                                 <span class="text-muted fs-7 text-truncate me-3">
-                                                        <i class="bi bi-file-earmark me-1"></i>
-                                                        <?= esc($berkas[$kode]['nama_file']) ?>
-                                                    </span>
-                                                    <a href="<?= base_url($berkas[$kode]['path_file']) ?>"
-                                                        target="_blank"
-                                                        class="btn btn-sm btn-light-primary text-nowrap">
-                                                        <i class="bi bi-eye me-1"></i>Lihat
+                                                    <i class="bi bi-file-earmark me-1"></i>
+                                                    <?= esc($berkas[$kode]['nama_file']) ?>
+                                                </span>
+                                                <a href="<?= base_url($berkas[$kode]['path_file']) ?>"
+                                                    target="_blank"
+                                                    class="btn btn-sm btn-light-primary text-nowrap">
+                                                    <i class="bi bi-eye me-1"></i>Lihat
                                                 </a>
                                             </div>
                                         <?php endif ?>
