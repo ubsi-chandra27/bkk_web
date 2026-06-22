@@ -16,7 +16,7 @@
         <!-- Mobile logo -->
         <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
             <a href="<?= site_url('admin/dashboard') ?>" class="d-lg-none">
-                <img alt="Logo" src="<?= base_url('assets/media/logos/logo-2.svg') ?>" class="h-30px" />
+                <img alt="Logo" src="<?= base_url('assets/media/logos/logo-bkk.png') ?>" class="h-60px" />
             </a>
         </div>
 
@@ -27,7 +27,7 @@
             <div class="d-flex align-items-stretch flex-shrink-0">
 
                 <!-- Theme toggle -->
-                <div class="d-flex align-items-center ms-1 ms-lg-3">
+                <!-- <div class="d-flex align-items-center ms-1 ms-lg-3">
                     <button type="button"
                         class="btn btn-icon btn-active-light-primary w-30px h-30px w-md-40px h-md-40px"
                         data-theme-toggle-button
@@ -35,33 +35,30 @@
                         title="Ganti theme">
                         <i class="fas fa-moon fs-2" data-theme-toggle-icon></i>
                     </button>
-                </div>
+                </div> -->
 
                 <!-- Notifikasi -->
                 <div class="d-flex align-items-center ms-1 ms-lg-3">
                     <div class="btn btn-icon btn-active-light-primary position-relative w-30px h-30px w-md-40px h-md-40px"
                         data-kt-menu-trigger="click"
                         data-kt-menu-attach="parent"
-                        data-kt-menu-placement="bottom-end">
-                        <span class="svg-icon svg-icon-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M11.2929 2.70711C11.6834 2.31658 12.3166 2.31658 12.7071 2.70711L15.2929 5.29289C15.6834 5.68342 15.6834 6.31658 15.2929 6.70711L12.7071 9.29289C12.3166 9.68342 11.6834 9.68342 11.2929 9.29289L8.70711 6.70711C8.31658 6.31658 8.31658 5.68342 8.70711 5.29289L11.2929 2.70711Z" fill="black" />
-                                <path d="M11.2929 14.7071C11.6834 14.3166 12.3166 14.3166 12.7071 14.7071L15.2929 17.2929C15.6834 17.6834 15.6834 18.3166 15.2929 18.7071L12.7071 21.2929C12.3166 21.6834 11.6834 21.6834 11.2929 21.2929L8.70711 18.7071C8.31658 18.3166 8.31658 17.6834 8.70711 17.2929L11.2929 14.7071Z" fill="black" />
-                                <path opacity="0.3" d="M5.29289 8.70711C5.68342 8.31658 6.31658 8.31658 6.70711 8.70711L9.29289 11.2929C9.68342 11.6834 9.68342 12.3166 9.29289 12.7071L6.70711 15.2929C6.31658 15.6834 5.68342 15.6834 5.29289 15.2929L2.70711 12.7071C2.31658 12.3166 2.31658 11.6834 2.70711 11.2929L5.29289 8.70711Z" fill="black" />
-                                <path opacity="0.3" d="M17.2929 8.70711C17.6834 8.31658 18.3166 8.31658 18.7071 8.70711L21.2929 11.2929C21.6834 11.6834 21.6834 12.3166 21.2929 12.7071L18.7071 15.2929C18.3166 15.6834 17.6834 15.6834 17.2929 15.2929L14.7071 12.7071C14.3166 12.3166 14.3166 11.6834 14.7071 11.2929L17.2929 8.70711Z" fill="black" />
-                            </svg>
-                        </span>
+                        data-kt-menu-placement="bottom-end"
+                        id="notification-bell">
+                        <i class="fa-regular fa-bell fs-2"></i>
+                        <span class="notification-dot position-absolute translate-middle" id="notification-badge" style="display: none;"></span>
                     </div>
 
                     <!-- Dropdown Notifikasi -->
-                    <div class="menu menu-sub menu-sub-dropdown menu-column w-350px w-lg-375px" data-kt-menu="true">
-                        <div class="d-flex flex-column bgi-no-repeat rounded-top" style="background-image:url('<?= base_url('assets/media/misc/pattern-1.jpg') ?>')">
-                            <h3 class="text-white fw-bold px-9 mt-10 mb-6">
-                                Notifikasi
-                            </h3>
+                    <div class="menu menu-sub menu-sub-dropdown menu-column notification-menu w-350px w-lg-375px" data-kt-menu="true" id="notification-dropdown">
+                        <div class="notification-menu-head">
+                            <div>
+                                <div class="notification-title">Notifikasi</div>
+                                <div class="notification-subtitle"><span id="notif-count">0</span> belum dibaca</div>
+                            </div>
+                            <button type="button" class="notification-clear" id="mark-all-read">Bersihkan</button>
                         </div>
-                        <div class="scroll-y mh-325px my-5 px-8">
-                            <div class="text-center text-muted py-10">Tidak ada notifikasi</div>
+                        <div class="notification-list scroll-y mh-325px" id="notification-list">
+                            <div class="text-center text-muted py-10" id="notif-empty">Memuat notifikasi...</div>
                         </div>
                     </div>
                 </div>
@@ -99,25 +96,14 @@
 
                         <!-- Profil -->
                         <div class="menu-item px-5">
-                            <a href="<?= site_url('admin/profil') ?>" class="menu-link px-5">Profil Saya</a>
-                        </div>
-
-                        <!-- Pengaturan -->
-                        <div class="menu-item px-5">
-                            <a href="<?= site_url('admin/pengaturan') ?>" class="menu-link px-5">Pengaturan</a>
-                        </div>
-
-                        <div class="menu-item px-5">
-                            <button type="button" class="menu-link px-5 w-100 border-0 bg-transparent text-start" data-theme-toggle-button aria-pressed="false">
-                                <span class="menu-title" data-theme-toggle-label>Light Mode</span>
-                            </button>
+                            <a href="<?= site_url('admin/profil-saya') ?>" class="menu-link px-5">Profil Saya</a>
                         </div>
 
                         <div class="separator my-2"></div>
 
                         <!-- Logout -->
                         <div class="menu-item px-5">
-                            <a href="<?= site_url('auth/logout') ?>" class="menu-link px-5 text-danger">
+                            <a href="<?= base_url('/logout') ?>" class="menu-link px-5 text-danger">
                                 Sign Out
                             </a>
                         </div>

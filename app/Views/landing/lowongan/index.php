@@ -1,11 +1,93 @@
 <?= $this->extend('landing/layout/app') ?>
 
+<?php
+$filters = $filters ?? [
+    'posisi' => (string) service('request')->getGet('posisi'),
+    'gaji' => (string) service('request')->getGet('gaji'),
+    'jurusan' => (string) service('request')->getGet('jurusan'),
+    'lokasi' => (string) service('request')->getGet('lokasi'),
+];
+$jurusanList = $jurusanList ?? [];
+$lokasiList = $lokasiList ?? [];
+?>
+
 <?= $this->section('hero-section') ?>
-<div class="d-flex flex-column flex-center w-100 min-h-100px min-h-lg-200px px-9 text-center">
+<div class="d-flex flex-column flex-center w-100 min-h-300px min-h-lg-400px px-9 text-center">
     <h1 class="text-white fw-bolder fs-2hx mb-3">Lowongan Kerja</h1>
-    <p class="text-white fw-semibold fs-5 opacity-75 mb-0">
+    <p class="text-white fw-semibold fs-5 opacity-75 mb-8">
         Temukan peluang karir terbaik untuk Anda
     </p>
+
+    <!-- ===== Filter Lowongan (GET) ===== -->
+    <div class="container">
+        <div class="card text-start border border-white border-opacity-25 shadow-lg"
+            style="background:rgba(255,255,255,.16);backdrop-filter:blur(14px);">
+            <div class="card-body p-5">
+                <form action="<?= site_url('lowongan') ?>" method="get" class="row g-3 align-items-end">
+                    <div class="col-12 col-lg-3">
+                        <label for="filterPosisi" class="form-label fw-semibold text-white">Posisi</label>
+                        <input type="text"
+                            class="form-control bg-white bg-opacity-95 border-0"
+                            id="filterPosisi"
+                            name="posisi"
+                            value="<?= esc($filters['posisi'] ?? '') ?>"
+                            placeholder="Cari posisi...">
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-2">
+                        <label for="filterGaji" class="form-label fw-semibold text-white">Gaji</label>
+                        <select class="form-select bg-white bg-opacity-95 border-0" id="filterGaji" name="gaji">
+                            <option value="">Semua Gaji</option>
+                            <option value="lt5" <?= (($filters['gaji'] ?? '') === 'lt5') ? 'selected' : '' ?>>&lt; Rp 5.000.000</option>
+                            <option value="5to10" <?= (($filters['gaji'] ?? '') === '5to10') ? 'selected' : '' ?>>Rp 5.000.000 - Rp 10.000.000</option>
+                            <option value="10to15" <?= (($filters['gaji'] ?? '') === '10to15') ? 'selected' : '' ?>>Rp 10.000.000 - Rp 15.000.000</option>
+                            <option value="gt15" <?= (($filters['gaji'] ?? '') === 'gt15') ? 'selected' : '' ?>>&gt; Rp 15.000.000</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-2">
+                        <label for="filterJurusan" class="form-label fw-semibold text-white">Bidang/Jurusan</label>
+                        <select class="form-select bg-white bg-opacity-95 border-0" id="filterJurusan" name="jurusan">
+                            <option value="">Semua Jurusan</option>
+                            <?php foreach ($jurusanList as $jurusanItem): ?>
+                                <?php
+                                $jurusanValue = (string) ($jurusanItem['id'] ?? '');
+                                $jurusanLabel = $jurusanItem['kompetensi_keahlian'] ?? $jurusanItem['akronim'] ?? '';
+                                ?>
+                                <?php if ($jurusanValue !== '' && $jurusanLabel !== ''): ?>
+                                    <option value="<?= esc($jurusanValue) ?>" <?= ((string) ($filters['jurusan'] ?? '') === $jurusanValue) ? 'selected' : '' ?>>
+                                        <?= esc($jurusanLabel) ?>
+                                    </option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-2">
+                        <label for="filterLokasi" class="form-label fw-semibold text-white">Lokasi</label>
+                        <select class="form-select bg-white bg-opacity-95 border-0" id="filterLokasi" name="lokasi">
+                            <option value="">Semua Lokasi</option>
+                            <?php foreach ($lokasiList as $lokasiItem): ?>
+                                <?php $lokasiValue = $lokasiItem['lokasi'] ?? ''; ?>
+                                <?php if ($lokasiValue !== ''): ?>
+                                    <option value="<?= esc($lokasiValue) ?>" <?= (($filters['lokasi'] ?? '') === $lokasiValue) ? 'selected' : '' ?>>
+                                        <?= esc($lokasiValue) ?>
+                                    </option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-12 col-lg-2">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary px-3 shadow-sm">
+                                <i class="bi bi-funnel"></i>Filter
+                            </button>
+                            <a href="<?= site_url('lowongan') ?>" class="btn btn-light px-3 shadow-sm">
+                                Reset
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 <?= $this->endSection() ?>
 
@@ -52,6 +134,25 @@
     <!-- ===== Grid Lowongan ===== -->
     <div class="row g-6">
         <?php if (!empty($lowongans)): ?>
+            <?php
+            function formatGaji($angka)
+            {
+                if (!$angka || $angka <= 0) return null;
+                if ($angka >= 1_000_000_000) {
+                    $val = $angka / 1_000_000_000;
+                    return ($val == floor($val) ? (int)$val : round($val, 1)) . 'M+';
+                }
+                if ($angka >= 1_000_000) {
+                    $val = $angka / 1_000_000;
+                    return ($val == floor($val) ? (int)$val : round($val, 1)) . 'jt+';
+                }
+                if ($angka >= 1_000) {
+                    $val = $angka / 1_000;
+                    return ($val == floor($val) ? (int)$val : round($val, 1)) . 'rb+';
+                }
+                return number_format($angka, 0, ',', '.');
+            }
+            ?>
             <?php foreach ($lowongans as $lw): ?>
                 <div class="col-md-6 col-xl-4" data-kt-search-element="item">
                     <div class="card h-100 shadow-sm hover-elevate-up"
@@ -63,7 +164,7 @@
                                 <div class="symbol symbol-60px">
                                     <?php if (!empty($lw['logo'])): ?>
                                         <span class="symbol-label bg-light-primary">
-                                            <img src="<?= base_url('uploads/' . $lw['logo']) ?>"
+                                            <img src="<?= base_url('uploads/logo/' . $lw['logo']) ?>"
                                                 alt="logo" class="w-100 h-100"
                                                 style="object-fit:contain;padding:8px;" />
                                         </span>
@@ -73,15 +174,23 @@
                                         </span>
                                     <?php endif; ?>
                                 </div>
-                                <?php if (!empty($lw['jenis_pekerjaan'])): ?>
-                                    <!--
-                                jenis_pekerjaan juga bisa dicari karena ada di data-kt-search-element="text"
-                                di bawah, tapi badge ini hanya visual
-                            -->
-                                    <span class="badge badge-light-info fw-bold">
-                                        <?= esc($lw['jenis_pekerjaan']) ?>
-                                    </span>
-                                <?php endif; ?>
+                                <div class="d-flex flex-column align-items-end gap-2">
+                                    <?php if (!empty($lw['jenis_pekerjaan'])): ?>
+                                        <span class="badge badge-light-info fw-bold">
+                                            <?= esc($lw['jenis_pekerjaan']) ?>
+                                        </span>
+                                    <?php endif; ?>
+
+                                    <?php
+                                    $gajiRaw = preg_replace('/[^0-9]/', '', $lw['gaji'] ?? '');
+                                    $gajiLabel = $gajiRaw ? formatGaji((int)$gajiRaw) : null;
+                                    ?>
+                                    <?php if ($gajiLabel): ?>
+                                        <span class="badge badge-light-info fw-bold fs-7">
+                                            Rp <?= esc($gajiLabel) ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
                             </div>
 
                             <!-- Posisi → title (teks utama pencarian) -->

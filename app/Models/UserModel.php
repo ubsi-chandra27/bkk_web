@@ -19,6 +19,11 @@ class UserModel extends Model
         'email',
         'password',
         'remember_token',
+        'reset_token',
+        'reset_expires',
+        'email_token',
+        'email_verified_at',
+        'is_verified',
         'is_active',
         'last_login'
     ];

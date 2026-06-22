@@ -19,6 +19,17 @@ $activeTab = session()->getFlashdata('active_tab') ?? 'tab_data_diri';
 $jenisBerkas = $jenisBerkas ?? [];
 ?>
 
+<style>
+.password-strength-meter { margin-top: 10px; }
+.strength-bar { height: 6px; background-color: #e9ecef; border-radius: 3px; overflow: hidden; }
+.strength-progress { height: 100%; width: 0%; transition: width 0.3s ease, background-color 0.3s ease; }
+.strength-text .text-success { color: #50cd89; }
+.strength-text .text-warning { color: #ffc107; }
+.strength-text .text-danger { color: #f1416c; }
+.password-requirements li { transition: color 0.3s ease; }
+.password-requirements li.text-success { color: #50cd89 !important; }
+</style>
+
 <div class="container py-10">
     <?php if (session()->getFlashdata('success')): ?>
         <div class="alert alert-success alert-dismissible mb-6">
@@ -30,6 +41,17 @@ $jenisBerkas = $jenisBerkas ?? [];
     <?php if (session()->getFlashdata('error')): ?>
         <div class="alert alert-danger alert-dismissible mb-6">
             <i class="bi bi-exclamation-circle me-2"></i><?= esc(session()->getFlashdata('error')) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif ?>
+    <?php if (session()->getFlashdata('errors')): ?>
+        <div class="alert alert-danger alert-dismissible mb-6">
+            <i class="bi bi-exclamation-circle me-2"></i><strong>Terdapat kesalahan:</strong>
+            <ul class="mb-0 mt-2">
+                <?php foreach (session()->getFlashdata('errors') as $err): ?>
+                    <li><?= esc($err) ?></li>
+                <?php endforeach ?>
+            </ul>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif ?>
@@ -145,7 +167,22 @@ $jenisBerkas = $jenisBerkas ?? [];
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Password Baru</label>
-                                        <input type="password" class="form-control form-control-solid" name="password" placeholder="Kosongkan jika tidak diubah" />
+                                        <input type="password" class="form-control form-control-solid" name="password" id="profilPassword" placeholder="Kosongkan jika tidak diubah" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}" title="Password harus minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan simbol." />
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="password-strength-meter" id="profilPasswordMeter">
+                                            <div class="strength-bar">
+                                                <div class="strength-progress" id="profilStrengthProgress" style="width: 0%; background-color: #e9ecef;"></div>
+                                            </div>
+                                            <div class="strength-text mt-2" id="profilStrengthText">Kekuatan password: <span class="text-muted">Belum diisi</span></div>
+                                            <ul class="password-requirements list-unstyled mt-2">
+                                                <li id="profil-req-length" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Minimal 8 karakter</li>
+                                                <li id="profil-req-uppercase" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung huruf besar (A-Z)</li>
+                                                <li id="profil-req-lowercase" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung huruf kecil (a-z)</li>
+                                                <li id="profil-req-number" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung angka (0-9)</li>
+                                                <li id="profil-req-symbol" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung karakter simbol (!@#$%^&* dll)</li>
+                                            </ul>
+                                        </div>
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label fw-semibold">Alamat</label>
@@ -165,18 +202,10 @@ $jenisBerkas = $jenisBerkas ?? [];
             </form>
         </div>
 
-        <div class="tab-pane fade" id="tab_tracer">
-            <form action="<?= site_url('profil/update-tracer') ?>" method="POST">
-                <?= csrf_field() ?>
-                <?php if (!$isAlumni): ?>
-                    <div class="card shadow-sm">
-                        <div class="card-body py-12 text-center">
-                            <i class="bi bi-person-badge fs-2x text-gray-400 mb-4 d-block"></i>
-                            <div class="fw-bolder text-gray-800 mb-2">Tab tracer hanya untuk akun alumni</div>
-                            <div class="text-muted">Akun ini belum termasuk kategori alumni, jadi data alumni dan tracer tidak bisa diisi.</div>
-                        </div>
-                    </div>
-                <?php else: ?>
+        <?php if ($isAlumni): ?>
+            <div class="tab-pane fade" id="tab_tracer">
+                <form action="<?= site_url('profil/update-tracer') ?>" method="POST">
+                    <?= csrf_field() ?>
                     <div class="card shadow-sm">
                         <div class="card-header border-bottom pt-6">
                             <h3 class="card-title fw-bolder">Data Alumni & Tracer</h3>
@@ -288,7 +317,7 @@ $jenisBerkas = $jenisBerkas ?? [];
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label fw-semibold">Status Kuliah</label>
-                                                    <input type="text" class="form-control form-control-solid" name="status_kuliah" value="<?= esc($tracer['status_kuliah'] ?? '') ?>" placeholder="Contoh: Semester 4" />
+                                                    <input type="text" class="form-control form-control-solid" name="status_kuliah" value="<?= esc($tracer['status_kuliah'] ?? '') ?>" placeholder="Contoh: D3/D4/S1/S2.." />
                                                 </div>
                                             </div>
                                         </div>
@@ -356,9 +385,9 @@ $jenisBerkas = $jenisBerkas ?? [];
                             <i class="bi bi-save me-2"></i><?= !empty($tracer) || !empty($alumni) ? 'Update Data Tracer' : 'Simpan Data Tracer' ?>
                         </button>
                     </div>
-            </form>
+                </form>
+            </div>
         <?php endif ?>
-        </div>
 
         <div class="tab-pane fade" id="tab_berkas">
             <form action="<?= site_url('profil/upload-berkas') ?>" method="POST" enctype="multipart/form-data">
@@ -532,29 +561,53 @@ $jenisBerkas = $jenisBerkas ?? [];
         }
 
         // Jalankan ulang saat tab tracer dibuka
-        var tracerTab = document.querySelector('a[href="#tab_tracer"]');
+        var tracerTab = document.querySelector('a[data-bs-toggle="tab"][href="#tab_tracer"]');
         if (tracerTab) {
             tracerTab.addEventListener('shown.bs.tab', function() {
                 updateSections();
             });
         }
 
-        // Aktifkan tab dari hash URL
-        var hash = window.location.hash;
-        if (hash) {
-            var tabEl = document.querySelector('a[href="' + hash + '"]');
-            if (tabEl) new bootstrap.Tab(tabEl).show();
+        function getTabTrigger(target) {
+            if (!target || target.charAt(0) !== '#') return null;
+
+            return Array.prototype.find.call(
+                document.querySelectorAll('a[data-bs-toggle="tab"]'),
+                function(el) {
+                    return el.getAttribute('href') === target;
+                }
+            ) || null;
         }
 
-        // Aktifkan tab dari flash data
-        var activeTab = '<?= $activeTab ?>';
+        function showTabOrDefault(target, resetInvalidHash) {
+            var defaultTarget = '#tab_data_diri';
+            var tabEl = getTabTrigger(target);
+
+            if (!tabEl) {
+                tabEl = getTabTrigger(defaultTarget);
+                if (resetInvalidHash && window.location.hash && window.location.hash !== defaultTarget) {
+                    history.replaceState(null, null, defaultTarget);
+                }
+            }
+
+            if (tabEl) {
+                new bootstrap.Tab(tabEl).show();
+            }
+        }
+
+        // Aktifkan tab dari hash URL hanya jika nav-link tersedia untuk user ini.
+        if (window.location.hash) {
+            showTabOrDefault(window.location.hash, true);
+        }
+
+        // Aktifkan tab dari flash data hanya jika nav-link tersedia untuk user ini.
+        var activeTab = <?= json_encode($activeTab) ?>;
         if (activeTab && activeTab !== 'tab_data_diri') {
-            var flashTabEl = document.querySelector('a[href="#' + activeTab + '"]');
-            if (flashTabEl) new bootstrap.Tab(flashTabEl).show();
+            showTabOrDefault('#' + activeTab, true);
         }
 
         // Update hash saat tab diklik
-        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function(el) {
+        document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(function(el) {
             el.addEventListener('shown.bs.tab', function(e) {
                 history.replaceState(null, null, e.target.getAttribute('href'));
             });
@@ -589,5 +642,9 @@ $jenisBerkas = $jenisBerkas ?? [];
         });
 
     });
+
+    initPasswordMeter('profilPassword', 'profilStrengthProgress', 'profilStrengthText', [
+        'profil-req-length', 'profil-req-uppercase', 'profil-req-lowercase', 'profil-req-number', 'profil-req-symbol'
+    ]);
 </script>
 <?= $this->endSection() ?>

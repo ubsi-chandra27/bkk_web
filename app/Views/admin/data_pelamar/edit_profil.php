@@ -85,6 +85,13 @@
                                             <option value="aktif" <?= ($pelamar['status_pendaftaran'] ?? '') === 'aktif' ? 'selected' : '' ?>>Aktif</option>
                                         </select>
                                     </div>
+                                    <div class="w-100 mt-5">
+                                        <label class="fs-6 fw-semibold mb-2">Verifikasi Email</label>
+                                        <select class="form-control form-control-solid" name="is_verified">
+                                            <option value="0" <?= ($user['is_verified'] ?? 0) == 0 ? 'selected' : '' ?>>Belum Diverifikasi</option>
+                                            <option value="1" <?= ($user['is_verified'] ?? 0) == 1 ? 'selected' : '' ?>>Diverifikasi</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -274,7 +281,7 @@
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Status Kuliah</label>
-                                                        <input type="text" class="form-control form-control-solid" name="status_kuliah" value="<?= esc($tracer['status_kuliah'] ?? '') ?>" placeholder="Contoh: Semester 4" />
+                                                        <input type="text" class="form-control form-control-solid" name="status_kuliah" value="<?= esc($tracer['status_kuliah'] ?? '') ?>" placeholder="Contoh: D3/D4/S1/S2.." />
                                                     </div>
                                                 </div>
                                             </div>

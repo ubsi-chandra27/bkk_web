@@ -116,6 +116,160 @@
             color: #ffffff !important;
         }
 
+        .notification-dot {
+            top: 8px;
+            right: 7px;
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: #f1416c;
+            border: 2px solid #fff;
+        }
+
+        .notification-menu {
+            border: 1px solid #edf2f7;
+            border-radius: 8px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .notification-menu-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px 14px;
+            border-bottom: 1px solid #edf2f7;
+            background: #fff;
+        }
+
+        .notification-title {
+            color: #1f2937;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .notification-subtitle {
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 3px;
+        }
+
+        .notification-clear {
+            border: 0;
+            background: transparent;
+            color: #3b82f6;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 0;
+        }
+
+        .notification-list {
+            padding: 8px;
+            background: #fff;
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            transition: background 0.16s ease, transform 0.16s ease;
+        }
+
+        .notification-item:hover {
+            background: #f8fafc;
+            transform: translateY(-1px);
+        }
+
+        .notification-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 36px;
+        }
+
+        .notification-icon-success {
+            background: #ecfdf3;
+            color: #16a34a;
+        }
+
+        .notification-icon-warning {
+            background: #fff7ed;
+            color: #ea580c;
+        }
+
+        .notification-icon-info {
+            background: #f1faff;
+            color: #009ef7;
+        }
+
+        .notification-icon-primary {
+            background: #f8f5ff;
+            color: #7239ea;
+        }
+
+        .notification-content {
+            min-width: 0;
+        }
+
+        .notification-link {
+            display: block;
+            color: #1f2937;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.35;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .notification-message {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 1.35;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+
+        .notification-time {
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        body[data-admin-theme="dark"] .notification-menu,
+        body[data-admin-theme="dark"] .notification-menu-head,
+        body[data-admin-theme="dark"] .notification-list {
+            background: #0f172a;
+            border-color: rgba(148, 163, 184, 0.16);
+        }
+
+        body[data-admin-theme="dark"] .notification-title,
+        body[data-admin-theme="dark"] .notification-link {
+            color: #e5e7eb !important;
+        }
+
+        body[data-admin-theme="dark"] .notification-message,
+        body[data-admin-theme="dark"] .notification-subtitle,
+        body[data-admin-theme="dark"] .notification-time {
+            color: #94a3b8 !important;
+        }
+
+        body[data-admin-theme="dark"] .notification-item:hover {
+            background: #1e293b;
+        }
+
         body[data-admin-theme="dark"] .card,
         body[data-admin-theme="dark"] .modal-content,
         body[data-admin-theme="dark"] .dropdown-menu,
@@ -165,7 +319,7 @@
             border-color: rgba(255, 255, 255, 0.08) !important;
         }
 
-        body[data-admin-theme="dark"] .table > :not(caption) > * > * {
+        body[data-admin-theme="dark"] .table> :not(caption)>*>* {
             background-color: transparent !important;
             box-shadow: inset 0 0 0 9999px transparent !important;
         }
@@ -201,8 +355,48 @@
         body[data-admin-theme="dark"] .swal2-popup {
             background: #1f2937;
             color: #e5e7eb;
+
+
+        }
+
+        .stat-card-custom {
+            border-radius: 14px !important;
+            border: 0.5px solid #e9ecef !important;
+            transition: transform 0.22s cubic-bezier(.22, .68, 0, 1.2), box-shadow 0.22s !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card-custom:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.09) !important;
+        }
+
+        .stat-card-custom .top-accent {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3.5px;
+        }
+
+        .stat-card-custom .icon-box {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-card-custom .stat-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 5px;
         }
     </style>
+    <?= $this->renderSection('styles') ?>
 
 </head>
 
@@ -225,40 +419,65 @@
     <script src="<?= base_url('assets/js/custom/modals/upgrade-plan.js') ?>"></script>
     <script src="<?= base_url('assets/js/custom/modals/modal-form-handler.js') ?>"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
-        (function() {
-            window.applyAdminTheme = function(theme) {
-                const selectedTheme = theme === 'dark' ? 'dark' : 'light';
+        if (typeof window.initPasswordMeter !== 'function') {
+            window.initPasswordMeter = function(inputId, progressId, textId, reqIds) {
+                const input = document.getElementById(inputId);
+                if (!input) return;
 
-                document.documentElement.setAttribute('data-admin-theme', selectedTheme);
-                document.body.setAttribute('data-admin-theme', selectedTheme);
-                localStorage.setItem('admin-theme', selectedTheme);
+                const progress = document.getElementById(progressId);
+                const textEl = document.getElementById(textId);
 
-                document.querySelectorAll('[data-theme-toggle-label]').forEach(function(label) {
-                    label.textContent = selectedTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
-                });
+                function updateMeter() {
+                    const password = input.value;
+                    let score = 0;
 
-                document.querySelectorAll('[data-theme-toggle-icon]').forEach(function(icon) {
-                    icon.className = selectedTheme === 'dark' ? 'fas fa-sun fs-2' : 'fas fa-moon fs-2';
-                });
+                    if (password.length >= 8) score++;
+                    if (/[A-Z]/.test(password)) score++;
+                    if (/[a-z]/.test(password)) score++;
+                    if (/[0-9]/.test(password)) score++;
+                    if (/[^A-Za-z0-9]/.test(password)) score++;
 
-                document.querySelectorAll('[data-theme-toggle-button]').forEach(function(button) {
-                    button.setAttribute('aria-pressed', selectedTheme === 'dark' ? 'true' : 'false');
-                    button.setAttribute('title', selectedTheme === 'dark' ? 'Ganti ke light mode' : 'Ganti ke dark mode');
-                });
-            };
+                    const widths = [0, 20, 40, 60, 80, 100];
+                    const colors = ['#e9ecef', '#f1416c', '#f1416c', '#ffc107', '#ffc107', '#50cd89'];
+                    const labels = ['Belum diisi', 'Lemah', 'Lemah', 'Sedang', 'Sedang', 'Kuat'];
+                    const labelClasses = ['text-muted', 'text-danger', 'text-danger', 'text-warning', 'text-warning', 'text-success'];
 
-            document.addEventListener('DOMContentLoaded', function() {
-                window.applyAdminTheme(localStorage.getItem('admin-theme') || 'light');
+                    if (progress) {
+                        progress.style.width = widths[score] + '%';
+                        progress.style.backgroundColor = colors[score];
+                    }
 
-                document.querySelectorAll('[data-theme-toggle-button]').forEach(function(button) {
-                    button.addEventListener('click', function() {
-                        const nextTheme = (localStorage.getItem('admin-theme') || 'light') === 'dark' ? 'light' : 'dark';
-                        window.applyAdminTheme(nextTheme);
+                    if (textEl) {
+                        textEl.innerHTML = 'Kekuatan password: <span class="' + labelClasses[score] + '">' + labels[score] + '</span>';
+                    }
+
+                    reqIds.forEach(function(id) {
+                        const el = document.getElementById(id);
+                        if (!el) return;
+
+                        let met = false;
+                        if (id.includes('length') && password.length >= 8) met = true;
+                        else if (id.includes('uppercase') && /[A-Z]/.test(password)) met = true;
+                        else if (id.includes('lowercase') && /[a-z]/.test(password)) met = true;
+                        else if (id.includes('number') && /[0-9]/.test(password)) met = true;
+                        else if (id.includes('symbol') && /[^A-Za-z0-9]/.test(password)) met = true;
+
+                        el.classList.toggle('text-success', met);
+                        el.classList.toggle('text-muted', !met);
+
+                        const icon = el.querySelector('i');
+                        if (icon) {
+                            icon.className = met ? 'bi bi-check-circle me-1' : 'bi bi-x-circle me-1';
+                        }
                     });
-                });
-            });
-        })();
+                }
+
+                input.addEventListener('input', updateMeter);
+                updateMeter();
+            };
+        }
 
         // Global SweetAlert handlers
         $(document).ready(function() {
@@ -339,6 +558,243 @@
             });
         });
     </script>
+
+    <script>
+        // Notification System
+        (function() {
+            const csrfToken = '<?= csrf_hash() ?>';
+            let pollInterval;
+            let notificationsCache = [];
+
+            // Format waktu relatif dalam Bahasa Indonesia
+            function timeAgo(dateString) {
+                if (!dateString) {
+                    return 'Baru saja';
+                }
+
+                const date = new Date(dateString);
+                if (Number.isNaN(date.getTime())) {
+                    return 'Baru saja';
+                }
+
+                const now = new Date();
+                const diff = Math.max(0, now - date);
+                const seconds = Math.floor(diff / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const hours = Math.floor(minutes / 60);
+                const days = Math.floor(hours / 24);
+
+                if (days > 0) return days + ' hari yang lalu';
+                if (hours > 0) return hours + ' jam yang lalu';
+                if (minutes > 0) return minutes + ' menit yang lalu';
+                return 'Baru saja';
+            }
+
+            function escapeHtml(value) {
+                return String(value || '').replace(/[&<>"']/g, function(char) {
+                    return {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#039;'
+                    } [char];
+                });
+            }
+
+            function compactText(value, limit) {
+                const text = String(value || '').replace(/\s+/g, ' ').trim();
+                return text.length > limit ? text.slice(0, limit - 1).trim() + '...' : text;
+            }
+
+            function notificationTitle(notif) {
+                if (notif.type === 'new_application') return 'Lamaran baru';
+                if (notif.type === 'status_changed') return 'Status lamaran';
+                if (notif.type === 'new_user') return 'Pendaftar baru';
+                if (notif.type === 'tracer_study_submitted') return 'Tracer study baru';
+                return compactText(notif.title || 'Notifikasi', 42);
+            }
+
+            function notificationMessage(notif) {
+                const message = String(notif.message || '');
+                let match = message.match(/^(.+?) melamar posisi (.+)$/i);
+
+                if (match) {
+                    return compactText(match[1] + ' - ' + match[2], 58);
+                }
+
+                match = message.match(/untuk posisi (.+?) berubah menjadi:\s*(.+)$/i);
+
+                if (match) {
+                    return compactText(match[1] + ' - ' + match[2], 58);
+                }
+
+                return compactText(message, 58);
+            }
+
+            // Render notifikasi
+            function renderNotifications(notifs) {
+                notificationsCache = notifs;
+                const listEl = document.getElementById('notification-list');
+                const countEl = document.getElementById('notif-count');
+                const emptyEl = document.getElementById('notif-empty');
+                const badgeEl = document.getElementById('notification-badge');
+
+                if (countEl) countEl.textContent = notifs.length;
+
+                if (notifs.length === 0) {
+                    if (listEl) listEl.innerHTML = '<div class="text-center text-muted py-10" id="notif-empty">Tidak ada notifikasi</div>';
+                    if (badgeEl) badgeEl.style.display = 'none';
+                    return;
+                }
+
+                if (badgeEl) badgeEl.style.display = 'block';
+
+                let html = '';
+                notifs.forEach(function(notif) {
+                    const iconTone = {
+                        new_application: 'notification-icon-success',
+                        status_changed: 'notification-icon-warning',
+                        new_user: 'notification-icon-info',
+                        tracer_study_submitted: 'notification-icon-primary'
+                    } [notif.type] || 'notification-icon-warning';
+                    const iconClass = {
+                        new_application: 'fa-briefcase',
+                        status_changed: 'fa-clock',
+                        new_user: 'fa-user-plus',
+                        tracer_study_submitted: 'fa-file-lines'
+                    } [notif.type] || 'fa-bell';
+
+                    html += '<div class="notification-item" data-notif-id="' + escapeHtml(notif.id) + '" data-notif-url="' + escapeHtml(notif.url || '') + '">';
+                    html += '<div class="notification-icon ' + iconTone + '">';
+                    html += '<i class="fas ' + iconClass + ' fs-5"></i>';
+                    html += '</div>';
+                    html += '<div class="notification-content flex-grow-1">';
+                    html += '<a href="javascript:;" class="notification-link notif-link">' + escapeHtml(notificationTitle(notif)) + '</a>';
+                    html += '<div class="notification-message">' + escapeHtml(notificationMessage(notif)) + '</div>';
+                    html += '<div class="notification-time">' + escapeHtml(timeAgo(notif.created_at)) + '</div>';
+                    html += '</div></div>';
+                });
+
+                if (listEl) listEl.innerHTML = html;
+            }
+
+            // Fetch notifikasi
+            function fetchNotifications() {
+                fetch('<?= site_url('api/notifications') ?>', {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        if (data && data.notifications) {
+                            renderNotifications(data.notifications);
+                        }
+                    })
+                    .catch(function(err) {
+                        console.error('Notification fetch error:', err);
+                    });
+            }
+
+            // Mark all as read
+            function markAllRead() {
+                fetch('<?= site_url('api/notifications/read') ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: '<?= csrf_token() ?>=' + csrfToken
+                    })
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function() {
+                        fetchNotifications();
+                    })
+                    .catch(function(err) {
+                        console.error('Mark read error:', err);
+                    });
+            }
+
+            // Mark one as read and redirect
+            function markOneAndRedirect(notifId, url) {
+                fetch('<?= site_url('api/notifications/read-one') ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: 'id=' + notifId + '&<?= csrf_token() ?>=' + csrfToken
+                    })
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function() {
+                        if (url) window.location.href = url;
+                    })
+                    .catch(function(err) {
+                        console.error('Mark one read error:', err);
+                    });
+            }
+
+            // Event handlers
+            document.addEventListener('DOMContentLoaded', function() {
+                // Polling every 10 seconds
+                fetchNotifications();
+                pollInterval = setInterval(fetchNotifications, 10000);
+
+                // Mark all read button
+                const markAllBtn = document.getElementById('mark-all-read');
+                if (markAllBtn) {
+                    markAllBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        markAllRead();
+                    });
+                }
+
+                // Handle notification click (delegation)
+                document.addEventListener('click', function(e) {
+                    const link = e.target.closest('.notif-link');
+                    if (link) {
+                        e.preventDefault();
+                        const notifEl = link.closest('[data-notif-id]');
+                        const notifId = notifEl ? notifEl.getAttribute('data-notif-id') : null;
+                        const notifUrl = notifEl ? notifEl.getAttribute('data-notif-url') : null;
+
+                        // Cari notifikasi di cache untuk mendapatkan url
+                        let targetUrl = notifUrl;
+                        if (!targetUrl && notifId) {
+                            const found = notificationsCache.find(function(n) {
+                                return n.id == notifId;
+                            });
+                            if (found && found.url) {
+                                targetUrl = found.url;
+                            }
+                        }
+
+                        // Default redirect berdasarkan role
+                        <?php if (session()->get('id_role') != 4 && session()->get('id_role') != 5): ?>
+                            targetUrl = targetUrl || '<?= site_url('admin/data-lamaran') ?>';
+                        <?php else: ?>
+                            targetUrl = targetUrl || '<?= site_url('profil') ?>#tab_lamaran';
+                        <?php endif; ?>
+
+                        if (notifId) {
+                            markOneAndRedirect(notifId, targetUrl);
+                        } else if (targetUrl) {
+                            window.location.href = targetUrl;
+                        }
+                    }
+                });
+            });
+        })();
+    </script>
+
     <?= $this->renderSection('scripts') ?>
 </body>
 

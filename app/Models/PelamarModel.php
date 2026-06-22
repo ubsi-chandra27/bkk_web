@@ -39,7 +39,7 @@ class PelamarModel extends Model
 
     public function getPelamarWithUser()
     {
-        return $this->select('tb_pelamar.*, tb_users.nama, tb_users.email, tb_users.is_active')
+        return $this->select('tb_pelamar.*, tb_users.nama, tb_users.email, tb_users.is_active, tb_users.is_verified')
             ->join('tb_users', 'tb_users.id = tb_pelamar.id_user')
             ->findAll();
     }
@@ -66,5 +66,22 @@ class PelamarModel extends Model
         $data['data']['account_id'] = sprintf('plm-%03d', $nextNumber);
 
         return $data;
+    }
+
+    /**
+     * Get total pelamar count
+     */
+    public function getTotalPelamar(): int
+    {
+        return $this->countAll();
+    }
+
+    /**
+     * Get new pelamar count for today
+     */
+    public function getTodayPelamarCount(): int
+    {
+        return $this->where('DATE(created_at)', date('Y-m-d'))
+            ->countAllResults();
     }
 }

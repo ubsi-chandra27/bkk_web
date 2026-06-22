@@ -68,16 +68,14 @@ function isActiveSidebar(string $path): bool
             <span class="menu-arrow"></span>
         </span>
         <div class="menu-sub menu-sub-accordion">
-            <?php if ($isLoggedIn && in_array($userRole, ['pelamar_alumni', 'admin_bkk', 'admin_dudi'])): ?>
-                <div class="menu-item">
-                    <a href="<?= site_url('pelamar/tracer') ?>"
-                        class="menu-link py-2 px-6 <?= isActiveSidebar('pelamar/tracer') ? 'active' : '' ?>"
-                        data-kt-drawer-dismiss="true">
-                        <span class="menu-icon me-2"><i class="fa-solid fa-graduation-cap fs-6"></i></span>
-                        <span class="menu-title">Tracer Alumni</span>
-                    </a>
-                </div>
-            <?php endif; ?>
+            <div class="menu-item">
+                <a href="<?= site_url('tracer-alumni') ?>"
+                    class="menu-link py-2 px-6 <?= isActiveSidebar('tracer-alumni') ? 'active' : '' ?>"
+                    data-kt-drawer-dismiss="true">
+                    <span class="menu-icon me-2"><i class="fa-solid fa-graduation-cap fs-6"></i></span>
+                    <span class="menu-title">Tracer Alumni</span>
+                </a>
+            </div>
             <div class="menu-item">
                 <a href="<?= site_url('perusahaan') ?>"
                     class="menu-link py-2 px-6 <?= isActiveSidebar('perusahaan') ? 'active' : '' ?>"

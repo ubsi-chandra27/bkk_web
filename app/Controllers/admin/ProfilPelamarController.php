@@ -14,6 +14,7 @@ use App\Models\AngkatanModel;
 use App\Models\JurusanModel;
 use App\Models\JenisBerkasModel;
 use App\Models\LamaranModel;
+use App\Models\RiwayatKerjaModel;
 
 class ProfilPelamarController extends BaseController
 {
@@ -34,6 +35,7 @@ class ProfilPelamarController extends BaseController
     protected $jurusanModel;
     protected $jenisBerkasModel;
     protected $lamaranModel;
+    protected $riwayatKerjaModel;
 
     public function __construct()
     {
@@ -48,6 +50,7 @@ class ProfilPelamarController extends BaseController
         $this->jurusanModel = new JurusanModel();
         $this->jenisBerkasModel = new JenisBerkasModel();
         $this->lamaranModel = new LamaranModel();
+        $this->riwayatKerjaModel = new RiwayatKerjaModel();
     }
 
     public function show($id)
@@ -79,7 +82,7 @@ class ProfilPelamarController extends BaseController
                 $berkas[$b['jenis_berkas']] = $b;
             }
         }
-
+        $lamaran = $this->lamaranModel->getByPelamar($pelamar['id']);
         $selectedLamaran = null;
         $berkasLamaran = [];
         $selectedTab = (string) $this->request->getGet('tab');
@@ -107,7 +110,9 @@ class ProfilPelamarController extends BaseController
         $data['berkas'] = $berkas;
         $data['berkasLamaran'] = $berkasLamaran;
         $data['selectedLamaran'] = $selectedLamaran;
+        $data['lamaran'] = $lamaran;
         $data['jenisBerkas'] = $this->jenisBerkasModel->getAktif();
+
         $data['aktivator'] = !empty($pelamar['diaktivasi_oleh'])
             ? $this->userModel->find($pelamar['diaktivasi_oleh'])
             : null;
@@ -164,14 +169,49 @@ class ProfilPelamarController extends BaseController
         $userModel   = new UserModel();
         $pelamarModel = new PelamarModel();
 
+        $validationRules = [
+            'nama'      => 'required|min_length[3]',
+            'email'     => 'required|valid_email|is_unique[tb_users.email,id,' . $id . ']',
+            'password'  => 'permit_empty|min_length[6]',
+            'is_active' => 'required|in_list[0,1]',
+            'is_verified' => 'required|in_list[0,1]',
+        ];
+
+        $validationMessages = [
+            'email' => [
+                'is_unique' => 'Email sudah terdaftar. Gunakan email lain.',
+            ],
+        ];
+
+        if (!$this->validate($validationRules, $validationMessages)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('errors', $this->validator->getErrors())
+                ->with('error', implode(' ', $this->validator->getErrors()))
+                ->with('active_tab', 'edit_profil');
+        }
+
+        $email = strtolower(trim((string) $this->request->getPost('email')));
+        $plainPassword = (string) $this->request->getPost('password');
+
         // Update tb_users
         $userData = [
             'nama'      => $this->request->getPost('nama'),
-            'email'     => $this->request->getPost('email'),
+            'email'     => $email,
             'is_active' => $this->request->getPost('is_active'),
+            'is_verified' => (int) $this->request->getPost('is_verified'),
         ];
-        if ($this->request->getPost('password')) {
-            $userData['password'] = password_hash($this->request->getPost('password'), PASSWORD_DEFAULT);
+
+        if ((int) $this->request->getPost('is_verified') === 1) {
+            $userData['email_verified_at'] = $userData['email_verified_at'] ?? date('Y-m-d H:i:s');
+            $userData['email_token'] = null;
+        } else {
+            $userData['email_verified_at'] = null;
+            $userData['email_token'] = null; // atau biarkan token lama jika perlu
+        }
+
+        if ($plainPassword !== '') {
+            $userData['password'] = password_hash($plainPassword, PASSWORD_DEFAULT);
         }
         $userModel->update($id, $userData);
 
@@ -210,9 +250,51 @@ class ProfilPelamarController extends BaseController
             $pelamarModel->insert($pelamarData);
         }
 
+        if ($plainPassword !== '') {
+            $this->sendAdminCreatedAccountEmail(
+                $email,
+                (string) $this->request->getPost('nama'),
+                $plainPassword
+            );
+        }
+
         return redirect()->to('/admin/data-pelamar/profil/' . $id . '/edit')
             ->with('success', 'Profil berhasil diperbarui')
             ->with('active_tab', 'edit_profil');
+    }
+
+    private function sendAdminCreatedAccountEmail(string $userEmail, string $nama, string $plainPassword): void
+    {
+        $loginLink = site_url('login');
+
+        $email = \Config\Services::email();
+        $email->setTo($userEmail);
+        $email->setSubject('Informasi Akun - BKK Tracer Study');
+        $email->setMessage('
+            <h3>Halo, ' . esc($nama) . '!</h3>
+            <p>Akun BKK Tracer Study Anda telah dibuat atau diperbarui oleh admin dan sudah terverifikasi.</p>
+            <p>Silakan login menggunakan informasi berikut:</p>
+            <table cellpadding="6" cellspacing="0" style="border-collapse:collapse;">
+                <tr>
+                    <td><strong>Email</strong></td>
+                    <td>' . esc($userEmail) . '</td>
+                </tr>
+                <tr>
+                    <td><strong>Password</strong></td>
+                    <td>' . esc($plainPassword) . '</td>
+                </tr>
+            </table>
+            <p>
+                <a href="' . esc($loginLink, 'attr') . '"
+                   style="background:#009ef7;color:#fff;padding:10px 20px;
+                          border-radius:6px;text-decoration:none;">
+                   Login Sekarang
+                </a>
+            </p>
+            <p>Untuk keamanan akun, segera ubah password setelah berhasil login.</p>
+            <p>Jika Anda merasa tidak terkait dengan pendaftaran ini, abaikan email ini.</p>
+        ');
+        $email->send();
     }
 
     private function buildStatusPendaftaranData(?string $statusPendaftaran, ?array $pelamar = null, ?int $aktivatorId = null): array
@@ -408,5 +490,190 @@ class ProfilPelamarController extends BaseController
         return redirect()->to('/admin/data-pelamar/profil/' . $id . '/edit#edit_berkas')
             ->with('success', 'Berkas berhasil diunggah')
             ->with('active_tab', 'edit_berkas');
+    }
+
+    public function riwayatKerja($id)
+    {
+        if (strtolower($this->request->getMethod()) !== 'get') {
+            return $this->riwayatKerjaJson(false, 'Method tidak diizinkan', [], 405);
+        }
+
+        $pelamar = $this->pelamarModel->getByUserId((int) $id);
+        if (!$pelamar) {
+            return $this->riwayatKerjaJson(false, 'Data pelamar tidak ditemukan', [], 404);
+        }
+
+        $data = $this->riwayatKerjaModel
+            ->select('id, id_pelamar, nama_perusahaan, posisi_jabatan, tanggal_mulai, tanggal_selesai, is_masih_bekerja, deskripsi_kerja')
+            ->where('id_pelamar', $pelamar['id'])
+            ->orderBy('tanggal_mulai', 'DESC')
+            ->orderBy('id', 'DESC')
+            ->findAll();
+
+        return $this->riwayatKerjaJson(true, 'Data riwayat kerja berhasil diambil', [
+            'data' => $data,
+        ]);
+    }
+
+    public function storeRiwayatKerja($id)
+    {
+        if (strtolower($this->request->getMethod()) !== 'post') {
+            return $this->riwayatKerjaJson(false, 'Method tidak diizinkan', [], 405);
+        }
+
+        if (!$this->canManageRiwayatKerja()) {
+            return $this->riwayatKerjaJson(false, 'Admin DUDI tidak memiliki akses untuk menambah riwayat kerja', [], 403);
+        }
+
+        $pelamar = $this->pelamarModel->getByUserId((int) $id);
+        if (!$pelamar) {
+            return $this->riwayatKerjaJson(false, 'Data pelamar tidak ditemukan', [], 404);
+        }
+
+        if (!$this->validate($this->riwayatKerjaValidationRules())) {
+            return $this->riwayatKerjaJson(false, 'Validasi gagal', [
+                'errors' => $this->validator->getErrors(),
+            ], 422);
+        }
+
+        $this->riwayatKerjaModel->insert($this->buildRiwayatKerjaPayload((int) $pelamar['id']));
+
+        return $this->riwayatKerjaJson(true, 'Riwayat kerja berhasil ditambahkan');
+    }
+
+    public function updateRiwayatKerja($id, int $idRiwayat)
+    {
+        if (strtolower($this->request->getMethod()) !== 'put') {
+            return $this->riwayatKerjaJson(false, 'Method tidak diizinkan', [], 405);
+        }
+
+        if (!$this->canManageRiwayatKerja()) {
+            return $this->riwayatKerjaJson(false, 'Admin DUDI tidak memiliki akses untuk mengedit riwayat kerja', [], 403);
+        }
+
+        $pelamar = $this->pelamarModel->getByUserId((int) $id);
+        if (!$pelamar) {
+            return $this->riwayatKerjaJson(false, 'Data pelamar tidak ditemukan', [], 404);
+        }
+
+        $riwayat = $this->riwayatKerjaModel
+            ->where('id', $idRiwayat)
+            ->where('id_pelamar', $pelamar['id'])
+            ->first();
+
+        if (!$riwayat) {
+            return $this->riwayatKerjaJson(false, 'Riwayat kerja tidak ditemukan', [], 404);
+        }
+
+        if (!$this->validate($this->riwayatKerjaValidationRules())) {
+            return $this->riwayatKerjaJson(false, 'Validasi gagal', [
+                'errors' => $this->validator->getErrors(),
+            ], 422);
+        }
+
+        $this->riwayatKerjaModel->update($idRiwayat, $this->buildRiwayatKerjaPayload((int) $pelamar['id']));
+
+        return $this->riwayatKerjaJson(true, 'Riwayat kerja berhasil diperbarui');
+    }
+
+    public function destroyRiwayatKerja($id, int $idRiwayat)
+    {
+        if (strtolower($this->request->getMethod()) !== 'delete') {
+            return $this->riwayatKerjaJson(false, 'Method tidak diizinkan', [], 405);
+        }
+
+        if (!$this->canManageRiwayatKerja()) {
+            return $this->riwayatKerjaJson(false, 'Admin DUDI tidak memiliki akses untuk menghapus riwayat kerja', [], 403);
+        }
+
+        $pelamar = $this->pelamarModel->getByUserId((int) $id);
+        if (!$pelamar) {
+            return $this->riwayatKerjaJson(false, 'Data pelamar tidak ditemukan', [], 404);
+        }
+
+        $riwayat = $this->riwayatKerjaModel
+            ->where('id', $idRiwayat)
+            ->where('id_pelamar', $pelamar['id'])
+            ->first();
+
+        if (!$riwayat) {
+            return $this->riwayatKerjaJson(false, 'Riwayat kerja tidak ditemukan', [], 404);
+        }
+
+        $this->riwayatKerjaModel->delete($idRiwayat);
+
+        return $this->riwayatKerjaJson(true, 'Riwayat kerja berhasil dihapus');
+    }
+
+    private function riwayatKerjaValidationRules(): array
+    {
+        return [
+            'nama_perusahaan' => [
+                'label' => 'Nama perusahaan',
+                'rules' => 'required|min_length[2]|max_length[150]',
+            ],
+            'posisi_jabatan' => [
+                'label' => 'Posisi jabatan',
+                'rules' => 'required|min_length[2]|max_length[100]',
+            ],
+            'tanggal_mulai' => [
+                'label' => 'Tanggal mulai',
+                'rules' => 'required|valid_date[Y-m-d]',
+            ],
+            'tanggal_selesai' => [
+                'label' => 'Tanggal selesai',
+                'rules' => 'permit_empty|valid_date[Y-m-d]',
+            ],
+            'deskripsi_kerja' => [
+                'label' => 'Deskripsi kerja',
+                'rules' => 'permit_empty|max_length[2000]',
+            ],
+        ];
+    }
+
+    private function canManageRiwayatKerja(): bool
+    {
+        return (int) session()->get('id_role') !== 3;
+    }
+
+    private function buildRiwayatKerjaPayload(int $idPelamar): array
+    {
+        $isMasihBekerja = in_array($this->riwayatKerjaInput('is_masih_bekerja'), ['1', 'on'], true);
+
+        return [
+            'id_pelamar' => $idPelamar,
+            'nama_perusahaan' => trim((string) $this->riwayatKerjaInput('nama_perusahaan')),
+            'posisi_jabatan' => trim((string) $this->riwayatKerjaInput('posisi_jabatan')),
+            'tanggal_mulai' => $this->riwayatKerjaInput('tanggal_mulai'),
+            'tanggal_selesai' => $isMasihBekerja ? null : ($this->riwayatKerjaInput('tanggal_selesai') ?: null),
+            'is_masih_bekerja' => $isMasihBekerja ? 1 : 0,
+            'deskripsi_kerja' => trim((string) $this->riwayatKerjaInput('deskripsi_kerja')),
+        ];
+    }
+
+    private function riwayatKerjaInput(string $key): ?string
+    {
+        $value = $this->request->getVar($key);
+        if ($value !== null) {
+            return is_array($value) ? null : (string) $value;
+        }
+
+        $rawInput = $this->request->getRawInput();
+        if (array_key_exists($key, $rawInput)) {
+            return is_array($rawInput[$key]) ? null : (string) $rawInput[$key];
+        }
+
+        return null;
+    }
+
+    private function riwayatKerjaJson(bool $success, string $message, array $extra = [], int $statusCode = 200)
+    {
+        return $this->response
+            ->setStatusCode($statusCode)
+            ->setJSON(array_merge([
+                'success' => $success,
+                'message' => $message,
+                'csrfHash' => csrf_hash(),
+            ], $extra));
     }
 }

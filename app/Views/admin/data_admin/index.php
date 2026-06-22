@@ -3,6 +3,16 @@
 <div id="kt_content_container" class="container-xxl">
 
     <div class="card mb-5 mb-xl-8">
+        <style>
+        .password-strength-meter { margin-top: 10px; }
+        .strength-bar { height: 6px; background-color: #e9ecef; border-radius: 3px; overflow: hidden; }
+        .strength-progress { height: 100%; width: 0%; transition: width 0.3s ease, background-color 0.3s ease; }
+        .strength-text .text-success { color: #50cd89; }
+        .strength-text .text-warning { color: #ffc107; }
+        .strength-text .text-danger { color: #f1416c; }
+        .password-requirements li { transition: color 0.3s ease; }
+        .password-requirements li.text-success { color: #50cd89 !important; }
+        </style>
         <div class="card-header border-0 pt-5">
             <h3 class="card-title align-items-start flex-column">
                 <span class="card-label fw-bolder fs-3 mb-1">Data Admin</span>
@@ -60,7 +70,20 @@
                                         </div>
                                         <div class="d-flex flex-column mb-8 fv-row">
                                             <label class="d-flex align-items-center fs-6 fw-semibold mb-2"><span class="required">Password Admin</span></label>
-                                            <input type="password" class="form-control form-control-solid" placeholder="Minimal 6 karakter" name="password" required />
+                                            <input type="password" class="form-control form-control-solid" placeholder="Minimal 8 karakter, huruf besar, huruf kecil, angka, dan simbol" name="password" id="tambahAdminPassword" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}" title="Password harus minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan simbol." required />
+                                        </div>
+                                        <div class="password-strength-meter" id="tambahAdminPasswordMeter">
+                                            <div class="strength-bar">
+                                                <div class="strength-progress" id="tambahStrengthProgress" style="width: 0%; background-color: #e9ecef;"></div>
+                                            </div>
+                                            <div class="strength-text mt-2" id="tambahStrengthText">Kekuatan password: <span class="text-muted">Belum diisi</span></div>
+                                            <ul class="password-requirements list-unstyled mt-2">
+                                                <li id="tambah-req-length" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Minimal 8 karakter</li>
+                                                <li id="tambah-req-uppercase" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung huruf besar (A-Z)</li>
+                                                <li id="tambah-req-lowercase" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung huruf kecil (a-z)</li>
+                                                <li id="tambah-req-number" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung angka (0-9)</li>
+                                                <li id="tambah-req-symbol" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung karakter simbol (!@#$%^&* dll)</li>
+                                            </ul>
                                         </div>
                                         <div class="d-flex flex-column mb-8 fv-row">
                                             <label class="d-flex align-items-center fs-6 fw-semibold mb-2"><span class="required">Jenis Admin</span></label>
@@ -71,7 +94,7 @@
                                                 <?php endforeach ?>
                                             </select>
                                         </div>
-                                        <div class="d-flex flex-column mb-8 fv-row d-none" id="fieldPerusahaan" style="display:none">
+                                        <div class="d-flex flex-column mb-8 fv-row d-none" id="fieldPerusahaan">
                                             <label class="d-flex align-items-center fs-6 fw-semibold mb-2">
                                                 <span class="required">Perusahaan DU/DI</span>
                                             </label>
@@ -168,8 +191,21 @@
                                         </div>
                                         <div class="d-flex flex-column mb-8 fv-row">
                                             <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Password Admin</label>
-                                            <input type="password" class="form-control form-control-solid" placeholder="Kosongkan jika tidak ingin mengubah" name="password" id="editPassword" />
+                                            <input type="password" class="form-control form-control-solid" placeholder="Kosongkan jika tidak ingin mengubah" name="password" id="editAdminPassword" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}" title="Password harus minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan simbol." />
                                             <div class="form-text text-muted fs-7">Kosongkan jika tidak ingin mengubah password</div>
+                                        </div>
+                                        <div class="password-strength-meter" id="editAdminPasswordMeter">
+                                            <div class="strength-bar">
+                                                <div class="strength-progress" id="editAdminStrengthProgress" style="width: 0%; background-color: #e9ecef;"></div>
+                                            </div>
+                                            <div class="strength-text mt-2" id="editAdminStrengthText">Kekuatan password: <span class="text-muted">Belum diisi</span></div>
+                                            <ul class="password-requirements list-unstyled mt-2">
+                                                <li id="editAdmin-req-length" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Minimal 8 karakter</li>
+                                                <li id="editAdmin-req-uppercase" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung huruf besar (A-Z)</li>
+                                                <li id="editAdmin-req-lowercase" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung huruf kecil (a-z)</li>
+                                                <li id="editAdmin-req-number" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung angka (0-9)</li>
+                                                <li id="editAdmin-req-symbol" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung karakter simbol (!@#$%^&* dll)</li>
+                                            </ul>
                                         </div>
                                         <div class="d-flex flex-column mb-8 fv-row">
                                             <label class="d-flex align-items-center fs-6 fw-semibold mb-2"><span class="required">Jenis Admin</span></label>
@@ -291,7 +327,7 @@
                             <th class="min-w-80px">JK</th>
                             <th class="min-w-100px">Telepon</th>
                             <th class="min-w-50px">Status</th>
-                            <th class="min-w-100px text-end pe-4">Aksi</th>
+                            <th class="min-w-150px text-end pe-4">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -333,6 +369,16 @@
                                         <?php endif ?>
                                     </td>
                                     <td class="text-end pe-3">
+                                        <a href="<?= site_url('admin/data-admin/' . $item['id'] . '/profil') ?>"
+                                            class="btn btn-icon btn-bg-light btn-active-color-info btn-sm me-1"
+                                            title="Detail">
+                                            <span class="svg-icon svg-icon-3">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                    <path opacity="0.3" d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10Z" fill="currentColor" />
+                                                    <path d="M11 11V17C11 17.6 11.4 18 12 18S13 17.6 13 17V11C13 10.4 12.6 10 12 10S11 10.4 11 11ZM12 8C12.8 8 13.5 7.3 13.5 6.5S12.8 5 12 5 10.5 5.7 10.5 6.5 11.2 8 12 8Z" fill="currentColor" />
+                                                </svg>
+                                            </span>
+                                        </a>
                                         <button type="button"
                                             class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1"
                                             data-bs-toggle="modal"
@@ -401,6 +447,17 @@
         }
     });
 
+    $(document).on('change', '#addAdminModal select[name="id_role"]', function() {
+        const role = $(this).val();
+        if (role == '3') {
+            $('#fieldPerusahaan').removeClass('d-none');
+            $('#selectPerusahaan').attr('required', true);
+        } else {
+            $('#fieldPerusahaan').addClass('d-none');
+            $('#selectPerusahaan').val('').attr('required', false);
+        }
+    });
+
     // Show/hide perusahaan di modal EDIT berdasarkan role
     $(document).on('change', '#editAdminModal select[name="id_role"]', function() {
         const role = $(this).val();
@@ -450,6 +507,18 @@
     $('#editAdminModal').on('hidden.bs.modal', function() {
         $('#fieldPerusahaanEdit').addClass('d-none');
         $('#selectPerusahaanEdit').val('').attr('required', false);
+        $('#editAdminPassword').val('');
+        $('#editAdminStrengthProgress').css({ width: '0%', backgroundColor: '#e9ecef' });
+        $('#editAdminStrengthText').html('Kekuatan password: <span class="text-muted">Belum diisi</span>');
+        $('#editAdminPasswordMeter li').removeClass('text-success').addClass('text-muted').find('i').attr('class', 'bi bi-x-circle me-1');
     });
+
+    initPasswordMeter('tambahAdminPassword', 'tambahStrengthProgress', 'tambahStrengthText', [
+        'tambah-req-length', 'tambah-req-uppercase', 'tambah-req-lowercase', 'tambah-req-number', 'tambah-req-symbol'
+    ]);
+
+    initPasswordMeter('editAdminPassword', 'editAdminStrengthProgress', 'editAdminStrengthText', [
+        'editAdmin-req-length', 'editAdmin-req-uppercase', 'editAdmin-req-lowercase', 'editAdmin-req-number', 'editAdmin-req-symbol'
+    ]);
 </script>
 <?php $this->endSection() ?>

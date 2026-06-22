@@ -23,6 +23,19 @@
                         <!--end::Link-->
                     </div>
                     <!--end::Heading-->
+
+                    <?php if (session()->getFlashdata('success')): ?>
+                        <div class="alert alert-success mb-8" role="alert">
+                            <?= esc(session()->getFlashdata('success')) ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (session()->getFlashdata('error')): ?>
+                        <div class="alert alert-danger mb-8" role="alert">
+                            <?= esc(session()->getFlashdata('error')) ?>
+                        </div>
+                    <?php endif; ?>
+
                     <!--begin::Separator-->
                     <div class="d-flex align-items-center mb-10">
                         <div class="border-bottom border-gray-300 mw-50 w-100"></div>
@@ -30,32 +43,6 @@
                         <div class="border-bottom border-gray-300 mw-50 w-100"></div>
                     </div>
                     <!--end::Separator-->
-
-                    <!--begin::Alert-->
-                    <?php if (session()->getFlashdata('success')): ?>
-                        <div class="alert alert-success d-flex align-items-center p-5 mb-10">
-                            <i class="ki-duotone ki-shield-tick fs-2hx text-success me-4">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                            </i>
-                            <div class="d-flex flex-column">
-                                <span><?= session()->getFlashdata('success') ?></span>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if (session()->getFlashdata('error')): ?>
-                        <div class="alert alert-danger d-flex align-items-center p-5 mb-10">
-                            <i class="ki-duotone ki-shield-cross fs-2hx text-danger me-4">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                            </i>
-                            <div class="d-flex flex-column">
-                                <span><?= session()->getFlashdata('error') ?></span>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                    <!--end::Alert-->
 
                     <!--begin::Input group-->
                     <div class="fv-row mb-10">
@@ -82,7 +69,7 @@
                             <label class="form-label fw-bolder text-dark fs-6 mb-0">Password</label>
                             <!--end::Label-->
                             <!--begin::Link-->
-                            <a href="#" class="link-primary fs-6 fw-bolder">Lupa Password?</a>
+                            <a href="<?= site_url('forgot-password') ?>" class="link-primary fs-6 fw-bolder">Lupa Password?</a>
                             <!--end::Link-->
                         </div>
                         <!--end::Wrapper-->
@@ -111,9 +98,6 @@
                 </form>
                 <!--end::Form-->
 
-                <?php if (session()->getFlashdata('error')): ?>
-                    <div class="d-none" id="flash" data-flash="error" data-message="<?= session()->getFlashdata('error') ?>"></div>
-                <?php endif; ?>
             </div>
             <!--end::Wrapper-->
         </div>

@@ -41,9 +41,11 @@ function deadlineBadge(string $tgl): string
         <a href="<?= site_url('lowongan') ?>" class="btn btn-primary btn-lg">
             <i class="bi bi-briefcase me-2"></i>Lihat Lowongan
         </a>
-        <a href="<?= site_url('register') ?>" class="btn btn-light btn-lg">
-            <i class="bi bi-person-plus me-2"></i>Daftar Sekarang
-        </a>
+        <?php if (!session()->get('isLoggedIn')): ?>
+            <a href="<?= site_url('register') ?>" class="btn btn-light btn-lg">
+                <i class="bi bi-person-plus me-2"></i>Daftar Sekarang
+            </a>
+        <?php endif; ?>
     </div>
 
     <!-- Statistik -->
@@ -90,102 +92,143 @@ function deadlineBadge(string $tgl): string
             <div class="fs-5 text-gray-600 fw-semibold">Ratusan peluang kerja menanti dari perusahaan terpercaya</div>
         </div>
 
-        <div class="row g-6 g-xl-9 mb-6 mb-xl-9">
-            <?php if (!empty($lowongans)): ?>
-                <?php foreach ($lowongans as $lw): ?>
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card h-100 shadow-sm hover-elevate-up"
-                            style="border-radius:.75rem;border:1px solid #e4e6ef;">
-                            <div class="card-body d-flex flex-column p-8">
+        <div class="position-relative slider-fade mb-6 mb-xl-9">
+            <!-- tombol kiri -->
+            <button class="btn btn-light btn-icon nav-left" onclick="slideLeft()">
+                <i class="fa fa-chevron-left"></i>
+            </button>
+            <div class="d-flex overflow-auto gap-6" id="cardSlider">
+                <?php if (!empty($lowongans)): ?>
+                    <?php
+                    function formatGaji($angka)
+                    {
+                        if (!$angka || $angka <= 0) return null;
+                        if ($angka >= 1_000_000_000) {
+                            $val = $angka / 1_000_000_000;
+                            return ($val == floor($val) ? (int)$val : round($val, 1)) . 'M+';
+                        }
+                        if ($angka >= 1_000_000) {
+                            $val = $angka / 1_000_000;
+                            return ($val == floor($val) ? (int)$val : round($val, 1)) . 'jt+';
+                        }
+                        if ($angka >= 1_000) {
+                            $val = $angka / 1_000;
+                            return ($val == floor($val) ? (int)$val : round($val, 1)) . 'rb+';
+                        }
+                        return number_format($angka, 0, ',', '.');
+                    }
+                    ?>
+                    <?php foreach ($lowongans as $lw): ?>
+                        <div class="flex-shrink-0" style="width: 350px;">
+                            <div class="card h-100 shadow-sm hover-elevate-up"
+                                style="border-radius:.75rem;border:1px solid #e4e6ef;">
+                                <div class="card-body d-flex flex-column p-8">
 
-                                <!-- Header: logo + jenis pekerjaan -->
-                                <div class="d-flex align-items-start justify-content-between mb-5">
-                                    <div class="symbol symbol-60px">
-                                        <?php if (!empty($lw['logo'])): ?>
-                                            <span class="symbol-label bg-light-primary">
-                                                <img src="<?= base_url('uploads/logo/' . $lw['logo']) ?>"
-                                                    alt="logo" class="w-100 h-100"
-                                                    style="object-fit:contain;padding:8px;" />
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="symbol-label bg-light-primary text-primary fs-2 fw-bold">
-                                                <?= strtoupper(substr($lw['nama_perusahaan'] ?? 'P', 0, 2)) ?>
-                                            </span>
-                                        <?php endif; ?>
+                                    <!-- Header: logo + jenis pekerjaan -->
+                                    <div class="d-flex align-items-start justify-content-between mb-5">
+                                        <div class="symbol symbol-60px">
+                                            <?php if (!empty($lw['logo'])): ?>
+                                                <span class="symbol-label bg-light-primary">
+                                                    <img src="<?= base_url('uploads/logo/' . $lw['logo']) ?>"
+                                                        alt="logo" class="w-100 h-100"
+                                                        style="object-fit:contain;padding:8px;" />
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="symbol-label bg-light-primary text-primary fs-2 fw-bold">
+                                                    <?= strtoupper(substr($lw['nama_perusahaan'] ?? 'P', 0, 2)) ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="d-flex flex-column align-items-end gap-2">
+                                            <?php if (!empty($lw['jenis_pekerjaan'])): ?>
+                                                <span class="badge badge-light-info fw-bold">
+                                                    <?= esc($lw['jenis_pekerjaan']) ?>
+                                                </span>
+                                            <?php endif; ?>
+
+                                            <?php
+                                            $gajiRaw = preg_replace('/[^0-9]/', '', $lw['gaji'] ?? '');
+                                            $gajiLabel = $gajiRaw ? formatGaji((int)$gajiRaw) : null;
+                                            ?>
+                                            <?php if ($gajiLabel): ?>
+                                                <span class="badge badge-light-info fw-bold fs-7">
+                                                    Rp <?= esc($gajiLabel) ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
-                                    <?php if (!empty($lw['jenis_pekerjaan'])): ?>
-                                        <span class="badge badge-light-info fw-bold">
-                                            <?= esc($lw['jenis_pekerjaan']) ?>
-                                        </span>
-                                    <?php endif; ?>
-                                </div>
 
-                                <!-- Posisi (field: posisi, bukan judul) -->
-                                <a href="<?= site_url('lowongan/' . $lw['id']) ?>"
-                                    class="text-gray-900 text-hover-primary fs-4 fw-bold mb-2 text-decoration-none">
-                                    <?= esc($lw['posisi']) ?>
-                                </a>
-
-                                <!-- Nama Perusahaan -->
-                                <div class="text-gray-600 fw-semibold fs-6 mb-5">
-                                    <i class="bi bi-building me-2 text-primary"></i>
-                                    <?= esc($lw['nama_perusahaan'] ?? '-') ?>
-                                </div>
-
-                                <div class="separator separator-dashed my-4"></div>
-
-                                <!-- Info detail -->
-                                <div class="d-flex flex-column gap-3 mb-7 fs-7 fw-semibold text-gray-700">
-
-                                    <!-- Lokasi kerja (field: lokasi_kerja) -->
-                                    <?php if (!empty($lw['lokasi_kerja'])): ?>
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-geo-alt text-gray-500 fs-5 me-3"></i>
-                                            <?= esc($lw['lokasi_kerja']) ?>
-                                        </div>
-                                    <?php elseif (!empty($lw['kota'])): ?>
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-geo-alt text-gray-500 fs-5 me-3"></i>
-                                            <?= esc($lw['kota']) ?>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <!-- Batas lamaran (field: batas_lamaran) -->
-                                    <?php if (!empty($lw['batas_lamaran'])): ?>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <i class="bi bi-clock text-gray-500 fs-5"></i>
-                                            Batas: <?= deadlineBadge($lw['batas_lamaran']) ?>
-                                        </div>
-                                    <?php endif; ?>
-
-                                </div>
-
-                                <!-- CTA -->
-                                <div class="mt-auto">
+                                    <!-- Posisi (field: posisi, bukan judul) -->
                                     <a href="<?= site_url('lowongan/' . $lw['id']) ?>"
-                                        class="btn btn-primary w-100">
-                                        <i class="bi bi-arrow-right-circle me-2"></i>Lihat Detail
+                                        class="text-gray-900 text-hover-primary fs-4 fw-bold mb-2 text-decoration-none">
+                                        <?= esc($lw['posisi']) ?>
                                     </a>
-                                </div>
 
+                                    <!-- Nama Perusahaan -->
+                                    <div class="text-gray-600 fw-semibold fs-6 mb-5">
+                                        <i class="bi bi-building me-2 text-primary"></i>
+                                        <?= esc($lw['nama_perusahaan'] ?? '-') ?>
+                                    </div>
+
+                                    <div class="separator separator-dashed my-4"></div>
+
+                                    <!-- Info detail -->
+                                    <div class="d-flex flex-column gap-3 mb-7 fs-7 fw-semibold text-gray-700">
+
+                                        <!-- Lokasi kerja (field: lokasi_kerja) -->
+                                        <?php if (!empty($lw['lokasi_kerja'])): ?>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-geo-alt text-gray-500 fs-5 me-3"></i>
+                                                <?= esc($lw['lokasi_kerja']) ?>
+                                            </div>
+                                        <?php elseif (!empty($lw['kota'])): ?>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-geo-alt text-gray-500 fs-5 me-3"></i>
+                                                <?= esc($lw['kota']) ?>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <!-- Batas lamaran (field: batas_lamaran) -->
+                                        <?php if (!empty($lw['batas_lamaran'])): ?>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-clock text-gray-500 fs-5"></i>
+                                                Batas: <?= deadlineBadge($lw['batas_lamaran']) ?>
+                                            </div>
+                                        <?php endif; ?>
+
+                                    </div>
+
+                                    <!-- CTA -->
+                                    <div class="mt-auto">
+                                        <a href="<?= site_url('lowongan/' . $lw['id']) ?>"
+                                            class="btn btn-primary w-100">
+                                            <i class="bi bi-arrow-right-circle me-2"></i>Lihat Detail
+                                        </a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-body text-center py-20">
+                                <i class="bi bi-inbox fs-5x text-gray-400 mb-5 d-block"></i>
+                                <h3 class="fs-2 fw-bold text-gray-800 mb-3">Belum Ada Lowongan</h3>
+                                <p class="fs-5 text-gray-600 mb-5">Pantau terus untuk update lowongan terbaru!</p>
+                                <a href="<?= site_url('register') ?>" class="btn btn-primary">
+                                    <i class="bi bi-person-plus me-2"></i>Daftar Sekarang
+                                </a>
                             </div>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-body text-center py-20">
-                            <i class="bi bi-inbox fs-5x text-gray-400 mb-5 d-block"></i>
-                            <h3 class="fs-2 fw-bold text-gray-800 mb-3">Belum Ada Lowongan</h3>
-                            <p class="fs-5 text-gray-600 mb-5">Pantau terus untuk update lowongan terbaru!</p>
-                            <a href="<?= site_url('register') ?>" class="btn btn-primary">
-                                <i class="bi bi-person-plus me-2"></i>Daftar Sekarang
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
+            </div>
+            <!-- tombol kanan -->
+            <button class="btn btn-light btn-icon nav-right" onclick="slideRight()">
+                <i class="fa fa-chevron-right"></i>
+            </button>
         </div>
 
         <div class="text-center">
@@ -213,10 +256,16 @@ function deadlineBadge(string $tgl): string
                 </div>
             </div>
 
-            <div class="row g-6 g-xl-9 mb-20">
+            <div class="position-relative slider-fade mb-6 mb-xl-9">
+                <!-- tombol kiri -->
+                <button class="btn btn-light btn-icon nav-left" onclick="slideLeftPerusahaan()">
+                    <i class="fa fa-chevron-left"></i>
+                </button>
+
+                <div class="d-flex overflow-auto gap-6" id="perusahaanSlider">
                 <?php if (!empty($perusahaans)): ?>
                     <?php foreach ($perusahaans as $pr): ?>
-                        <div class="col-lg-4 col-md-6">
+                        <div class="flex-shrink-0" style="width: 350px;">
                             <div class="card h-100 shadow-sm hover-elevate-up"
                                 style="border-radius:.75rem;border:1px solid #e4e6ef;">
                                 <div class="card-body d-flex flex-column p-8">
@@ -288,7 +337,7 @@ function deadlineBadge(string $tgl): string
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <div class="col-12">
+                    <div class="flex-shrink-0 w-100">
                         <div class="card shadow-sm">
                             <div class="card-body text-center py-20">
                                 <i class="bi bi-building fs-5x text-gray-400 mb-5 d-block"></i>
@@ -298,6 +347,18 @@ function deadlineBadge(string $tgl): string
                         </div>
                     </div>
                 <?php endif; ?>
+                </div>
+
+                <!-- tombol kanan -->
+                <button class="btn btn-light btn-icon nav-right" onclick="slideRightPerusahaan()">
+                    <i class="fa fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <div class="text-center">
+                <a href="<?= site_url('perusahaan') ?>" class="btn btn-lg btn-success">
+                    <i class="bi bi-buildings me-2"></i>Lihat Semua Mitra
+                </a>
             </div>
 
         </div>
@@ -427,8 +488,149 @@ function deadlineBadge(string $tgl): string
 <!-- ——— END KONTAK ——— -->
 
 <?= $this->endSection() ?>
+<?= $this->section('styles') ?>
+<style>
+    #cardSlider {
+        scroll-behavior: smooth;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+
+    }
+
+    #cardSlider>div {
+        scroll-snap-align: start;
+    }
+
+    #cardSlider::-webkit-scrollbar {
+        display: none;
+    }
+
+    #perusahaanSlider {
+        scroll-behavior: smooth;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #perusahaanSlider>div {
+        scroll-snap-align: start;
+    }
+
+    #perusahaanSlider::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-left,
+    .nav-right {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 20;
+
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(6px);
+        border: none;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+    }
+
+    .nav-left {
+        left: 10px;
+    }
+
+    .nav-right {
+        right: 10px;
+    }
+
+    .nav-left:hover,
+    .nav-right:hover {
+        background: #009ef7;
+        /* warna primary metronic */
+        color: white;
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .nav-left i,
+    .nav-right i {
+        font-size: 18px;
+    }
+
+    .slider-fade::before,
+    .slider-fade::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        width: 80px;
+        height: 100%;
+        z-index: 15;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+    }
+
+    /* kiri */
+    .slider-fade::before {
+        left: 0;
+        background: linear-gradient(to right, white, transparent);
+    }
+
+    /* kanan */
+    .slider-fade::after {
+        right: 0;
+        background: linear-gradient(to left, white, transparent);
+    }
+
+    /* kondisi hilang */
+    .no-left::before {
+        opacity: 0;
+    }
+
+    .no-right::after {
+        opacity: 0;
+    }
+</style>
+<?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<?php
+$session = session();
+$roleId = $session->get('role_id') ?? $session->get('id_role');
+$showTracerPopup = $session->get('isLoggedIn') && (int) $roleId === 4 && !empty($tracerKosong);
+?>
+<?php if ($showTracerPopup): ?>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Swal === 'undefined') {
+            return;
+        }
+
+        Swal.fire({
+            icon: 'info',
+            title: 'Lengkapi Data Tracer Alumni',
+            html: 'Halo! Kami membutuhkan data karir kamu untuk <b>Tracer Study</b> sekolah.<br><br>Mohon lengkapi data tracer alumni terlebih dahulu.',
+            showCancelButton: true,
+            confirmButtonText: '<i class="bi bi-pencil-fill me-1"></i> Isi Tracer Sekarang',
+            cancelButtonText: 'Nanti Saja',
+            confirmButtonColor: '#009ef7',
+            cancelButtonColor: '#7e8299',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/tracer-study';
+            }
+        });
+    });
+</script>
+<?php endif; ?>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof Typed !== 'undefined') {
@@ -444,6 +646,88 @@ function deadlineBadge(string $tgl): string
                 backDelay: 2000,
                 loop: true,
             });
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const slider = document.getElementById("cardSlider");
+
+        function getCardWidth() {
+            const card = slider.querySelector('.flex-shrink-0');
+            return card ? card.offsetWidth + 24 : 300;
+        }
+
+        window.slideLeft = function() {
+            slider.scrollTo({
+                left: slider.scrollLeft - getCardWidth(),
+                behavior: "smooth"
+            });
+        }
+
+        window.slideRight = function() {
+            slider.scrollTo({
+                left: slider.scrollLeft + getCardWidth(),
+                behavior: "smooth"
+            });
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const slider = document.getElementById("cardSlider");
+        const wrapper = document.querySelector(".slider-fade");
+
+        function updateFade() {
+            const maxScroll = slider.scrollWidth - slider.clientWidth;
+
+            // kiri
+            if (slider.scrollLeft <= 10) {
+                wrapper.classList.add("no-left");
+            } else {
+                wrapper.classList.remove("no-left");
+            }
+
+            // kanan
+            if (slider.scrollLeft >= maxScroll - 1) {
+                wrapper.classList.add("no-right");
+            } else {
+                wrapper.classList.remove("no-right");
+            }
+        }
+
+        // trigger saat scroll
+        slider.addEventListener("scroll", updateFade);
+
+        // trigger awal
+        updateFade();
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const sliderP = document.getElementById("perusahaanSlider");
+        const wrapperP = sliderP ? sliderP.closest(".slider-fade") : null;
+
+        function getCardWidthP() {
+            const card = sliderP.querySelector('.flex-shrink-0');
+            return card ? card.offsetWidth + 24 : 350;
+        }
+
+        window.slideLeftPerusahaan = function () {
+            sliderP.scrollTo({ left: sliderP.scrollLeft - getCardWidthP(), behavior: "smooth" });
+        };
+
+        window.slideRightPerusahaan = function () {
+            sliderP.scrollTo({ left: sliderP.scrollLeft + getCardWidthP(), behavior: "smooth" });
+        };
+
+        function updateFadeP() {
+            if (!wrapperP) return;
+            const maxScroll = sliderP.scrollWidth - sliderP.clientWidth;
+            wrapperP.classList.toggle("no-left", sliderP.scrollLeft <= 10);
+            wrapperP.classList.toggle("no-right", sliderP.scrollLeft >= maxScroll - 1);
+        }
+
+        if (sliderP) {
+            sliderP.addEventListener("scroll", updateFadeP);
+            updateFadeP();
         }
     });
 </script>

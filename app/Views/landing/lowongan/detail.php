@@ -39,6 +39,7 @@ $applyIcon = 'bi-send-fill';
 $applyClass = 'btn-primary';
 $berkasKurang = $berkasKurang ?? [];
 $berkasLamaran = $berkasLamaran ?? [];
+$statusPendaftaran = strtolower((string) ($statusPendaftaran ?? ''));
 $canApplyWithModal = true;
 
 if (isset($sudahLamar) && $sudahLamar) {
@@ -51,12 +52,18 @@ if (isset($sudahLamar) && $sudahLamar) {
     $applyUrl = site_url('login');
     $applyText = 'Login untuk Lamar';
     $applyIcon = 'bi-box-arrow-in-right';
-    $applyClass = 'btn-outline-primary';
+    $applyClass = 'btn-outline-primary btn-company-cta';
     $canApplyWithModal = false;
 } elseif (!in_array(session()->get('id_role'), [4, 5])) {
     $applyUrl = '#';
     $applyText = 'Hanya untuk Pelamar';
     $applyIcon = 'bi-exclamation-triangle';
+    $applyClass = 'btn-secondary disabled';
+    $canApplyWithModal = false;
+} elseif ($statusPendaftaran === 'menunggu_aktivasi') {
+    $applyUrl = '#';
+    $applyText = 'Menunggu Aktivasi';
+    $applyIcon = 'bi-hourglass-split';
     $applyClass = 'btn-secondary disabled';
     $canApplyWithModal = false;
 } elseif (!empty($berkasKurang)) {
@@ -132,7 +139,7 @@ if (isset($sudahLamar) && $sudahLamar) {
                     </div>
 
                     <div class="row gx-5 gy-5 mb-8">
-                        <div class="col-md-3 border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                        <div class="col-md-2 border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
                             <div class="fw-semibold text-gray-600 mb-2">Lokasi Kerja</div>
                             <div class="text-gray-800"><?= esc($lokasiKerja) ?></div>
                         </div>
@@ -156,6 +163,10 @@ if (isset($sudahLamar) && $sudahLamar) {
                         <div class="col-md-3 border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
                             <div class="fw-semibold text-gray-600 mb-2">Status Lowongan</div>
                             <div class="text-gray-800"><span class="badge <?= $statusClass ?> fw-bold"><?= esc(ucfirst($lowongan['status'] ?? '-')) ?></span></div>
+                        </div>
+                        <div class="col-md-2 border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                            <div class="fw-semibold text-gray-600 mb-2">Gaji</div>
+                            <div class="text-gray-800 "><?= esc($lowongan['gaji'] ?? '-') ?></div>
                         </div>
                     </div>
 
@@ -194,6 +205,14 @@ if (isset($sudahLamar) && $sudahLamar) {
                                     </div>
                                 </div>
                             <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($statusPendaftaran === 'menunggu_aktivasi'): ?>
+                        <div class="alert alert-warning d-flex align-items-start p-5 mb-8">
+                            <div class="d-flex flex-column">
+                                <span class="fw-semibold">Akun Anda masih menunggu aktivasi admin. Anda belum bisa melamar lowongan.</span>
+                            </div>
                         </div>
                     <?php endif; ?>
 
@@ -246,9 +265,9 @@ if (isset($sudahLamar) && $sudahLamar) {
                     </div>
 
                     <div>
-                                <h3 class="fs-3 fw-bold text-gray-800 mb-4">Kualifikasi & Persyaratan</h3>
-                                <div class="fs-6 text-gray-700"><?= nl2br(esc($lowongan['kualifikasi'] ?? 'Belum ada kualifikasi terdaftar.')) ?></div>
-                            </div>
+                        <h3 class="fs-3 fw-bold text-gray-800 mb-4">Kualifikasi & Persyaratan</h3>
+                        <div class="fs-6 text-gray-700"><?= nl2br(esc($lowongan['kualifikasi'] ?? 'Belum ada kualifikasi terdaftar.')) ?></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -282,11 +301,6 @@ if (isset($sudahLamar) && $sudahLamar) {
                     <div class="mb-6">
                         <div class="fw-semibold text-gray-600 mb-2">Lokasi</div>
                         <div class="text-gray-800"><?= esc($lokasiKerja) ?></div>
-                    </div>
-
-                    <div class="mb-6">
-                        <div class="fw-semibold text-gray-600 mb-2">Email</div>
-                        <div class="text-gray-800"><?= esc($lowongan['email_perusahaan'] ?? '-') ?></div>
                     </div>
 
                     <a href="<?= esc($companyUrl) ?>" class="btn btn-outline-primary btn-company-cta w-100 mt-6 fs-7">

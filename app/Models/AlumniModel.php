@@ -28,4 +28,21 @@ class AlumniModel extends Model
             ->where('tb_alumni.id_pelamar', $idPelamar)
             ->get()->getRowArray();
     }
+
+    /**
+     * Get total alumni count
+     */
+    public function getTotalAlumni(): int
+    {
+        return $this->countAll();
+    }
+
+    /**
+     * Get alumni count from last month
+     */
+    public function getLastMonthAlumniCount(): int
+    {
+        return $this->where('DATE_FORMAT(created_at, "%Y-%m")', date('Y-m', strtotime('last month')))
+                    ->countAllResults();
+    }
 }

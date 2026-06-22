@@ -171,11 +171,7 @@
                                             </select>
                                         </div>
                                         <div class="d-flex flex-column mb-8 fv-row">
-                                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">No Telepon</label>
-                                            <input type="text" class="form-control form-control-solid" placeholder="No Telepon" name="telepon" id="editTelepon" />
-                                        </div>
-                                        <div class="d-flex flex-column mb-8 fv-row">
-                                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Status</label>
+                                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Status Akun</label>
                                             <select class="form-control form-control-solid" name="is_active" id="editStatus">
                                                 <option value="1">Aktif</option>
                                                 <option value="0">Nonaktif</option>
@@ -185,34 +181,21 @@
                                     <!--end::Col Kiri-->
                                     <!--begin::Col Kanan-->
                                     <div class="col-md-6">
+
                                         <div class="d-flex flex-column mb-8 fv-row">
-                                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Jenis Kelamin</label>
-                                            <select class="form-control form-control-solid" name="jenis_kelamin" id="editJenisKelamin">
-                                                <option value="">Pilih Jenis Kelamin</option>
-                                                <option value="L">Laki-laki</option>
-                                                <option value="P">Perempuan</option>
+                                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Status Pendaftaran</label>
+                                            <select class="form-control form-control-solid" name="status_pendaftaran" id="editStatusPendaftaran">
+                                                <option value="menunggu_aktivasi">Menunggu Aktivasi</option>
+                                                <option value="terdaftar">Terdaftar</option>
+                                                <option value="aktif">Aktif</option>
                                             </select>
                                         </div>
-                                        <div class="d-flex flex-column mb-8 fv-row">
-                                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Tempat Lahir</label>
-                                            <input type="text" class="form-control form-control-solid" placeholder="Tempat Lahir" name="tempat_lahir" id="editTempatLahir" />
-                                        </div>
-                                        <div class="d-flex flex-column mb-8 fv-row">
-                                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Tanggal Lahir</label>
-                                            <input type="date" class="form-control form-control-solid" name="tanggal_lahir" id="editTanggalLahir" />
-                                        </div>
-                                        <div class="d-flex flex-column mb-8 fv-row">
-                                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Nomor NIK</label>
-                                            <input type="text" class="form-control form-control-solid" placeholder="Nomor NIK" name="nomer_nik" id="editNomerNik" />
-                                        </div>
-                                        <div class="d-flex flex-column mb-8 fv-row">
-                                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Alamat</label>
-                                            <textarea class="form-control form-control-solid" name="alamat" id="editAlamat" rows="2"></textarea>
-                                        </div>
-                                        <div class="d-flex flex-column mb-8 fv-row">
-                                            <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Foto</label>
-                                            <input type="file" class="form-control form-control-solid" name="foto" id="editFoto" accept="image/*" />
-                                            <div class="form-text text-muted fs-7">Unggah foto baru untuk mengganti foto lama</div>
+                                        <div class="w-100 mt-5">
+                                            <label class="fs-6 fw-semibold mb-2">Verifikasi Email</label>
+                                            <select class="form-control form-control-solid" name="is_verified" id="editIsVerified">
+                                                <option value="0">Belum Diverifikasi</option>
+                                                <option value="1">Diverifikasi</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <!--end::Col Kanan-->
@@ -262,8 +245,8 @@
                                     <label class="d-flex align-items-center fs-6 fw-semibold mb-2"><span class="required">Status Pendaftaran</span></label>
                                     <select class="form-control form-control-solid" name="status_pendaftaran" id="statusPendaftaranField" required>
                                         <option value="menunggu_aktivasi">Menunggu Aktivasi</option>
-                                        <option value="terdaftar">Terdaftar</option>
                                         <option value="aktif">Aktif</option>
+                                        <option value="terdaftar">Terdaftar</option>
                                     </select>
                                 </div>
                                 <div class="text-center">
@@ -316,9 +299,10 @@
                             <th class="min-w-120px">Nama</th>
                             <th class="min-w-100px">Email</th>
                             <th class="min-w-80px">Jenis Pelamar</th>
-                            <th class="min-w-50px">Status</th>
-                            <th class="min-w-140px">Aktivasi</th>
-                            <th class="min-w-100px text-end pe-4">Aksi</th>
+                            <th class="min-w-50px">Status Akun</th>
+                            <th class="min-w-140px">Verifikasi Email</th>
+                            <th class="min-w-140px">Pendaftaran</th>
+                            <th class="min-w-150px text-end pe-4">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -358,6 +342,13 @@
                                             <span class="badge badge-success">Aktif</span>
                                         <?php else: ?>
                                             <span class="badge badge-danger">Nonaktif</span>
+                                        <?php endif ?>
+                                    </td>
+                                    <td>
+                                        <?php if (isset($item['is_verified']) && $item['is_verified'] == 1): ?>
+                                            <span class="badge badge-success">Diverifikasi</span>
+                                        <?php else: ?>
+                                            <span class="badge badge-warning">Belum Diverifikasi</span>
                                         <?php endif ?>
                                     </td>
                                     <td>
@@ -403,14 +394,10 @@
                                             data-id="<?= $item['id_user'] ?>"
                                             data-nama="<?= esc($item['nama']) ?>"
                                             data-email="<?= esc($item['email']) ?>"
-                                            data-jenis_pelamar="<?= $item['jenis_pelamar'] ?? '' ?>"
-                                            data-telepon="<?= esc($item['telepon'] ?? '') ?>"
-                                            data-jenis_kelamin="<?= $item['jenis_kelamin'] ?? '' ?>"
-                                            data-tempat_lahir="<?= esc($item['tempat_lahir'] ?? '') ?>"
-                                            data-alamat="<?= esc($item['alamat'] ?? '') ?>"
-                                            data-nomer_nik="<?= esc($item['nomer_nik'] ?? '') ?>"
-                                            data-tanggal_lahir="<?= $item['tanggal_lahir'] ?? '' ?>"
+                                            data-jenis_pelamar="<?= esc($item['jenis_pelamar']) ?>"
                                             data-is_active="<?= $item['is_active'] ?? 1 ?>"
+                                            data-status_pendaftaran="<?= $item['status_pendaftaran'] ?? 'menunggu_aktivasi' ?>"
+                                            data-is_verified="<?= $item['is_verified'] ?? 0 ?>"
                                             title="Edit">
                                             <span class="svg-icon svg-icon-3">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -474,13 +461,9 @@
         modal.find('#editNama').val(button.data('nama'));
         modal.find('#editEmail').val(button.data('email'));
         modal.find('#editJenisPelamar').val(button.data('jenis_pelamar'));
-        modal.find('#editTelepon').val(button.data('telepon'));
-        modal.find('#editJenisKelamin').val(button.data('jenis_kelamin'));
-        modal.find('#editTempatLahir').val(button.data('tempat_lahir'));
-        modal.find('#editTanggalLahir').val(button.data('tanggal_lahir'));
-        modal.find('#editNomerNik').val(button.data('nomer_nik'));
-        modal.find('#editAlamat').val(button.data('alamat'));
         modal.find('#editStatus').val(button.data('is_active'));
+        modal.find('#editStatusPendaftaran').val(button.data('status_pendaftaran'));
+        modal.find('#editIsVerified').val(button.data('is_verified'));
 
         const actionTemplate = form.data('action-template');
         form.attr('action', actionTemplate.replace(':id', id));

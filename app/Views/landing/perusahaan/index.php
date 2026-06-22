@@ -113,34 +113,6 @@
                                     </span>
                                 </div>
                             <?php endif; ?>
-
-                            <?php if (!empty($pr['email'])): ?>
-                                <div class="d-flex align-items-center mb-3">
-                                    <i class="bi bi-envelope-fill text-primary me-3 fs-5"></i>
-                                    <a href="mailto:<?= esc($pr['email']) ?>"
-                                        class="text-primary fw-semibold fs-7 text-break">
-                                        <?= esc($pr['email']) ?>
-                                    </a>
-                                </div>
-                            <?php endif; ?>
-
-                            <?php if (!empty($pr['no_telepon'])): ?>
-                                <div class="d-flex align-items-center mb-5">
-                                    <i class="bi bi-telephone-fill text-primary me-3 fs-5"></i>
-                                    <a href="tel:<?= esc($pr['no_telepon']) ?>"
-                                        class="text-primary fw-semibold fs-7">
-                                        <?= esc($pr['no_telepon']) ?>
-                                    </a>
-                                </div>
-                            <?php endif; ?>
-
-                            <div class="mt-auto">
-                                <a href="<?= site_url('perusahaan/' . $pr['id']) ?>"
-                                    class="btn btn-light-primary w-100">
-                                    <i class="bi bi-eye me-2"></i>Lihat Profil
-                                </a>
-                            </div>
-
                         </div>
                     </div>
                 </div>

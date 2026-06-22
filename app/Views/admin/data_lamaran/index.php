@@ -3,6 +3,27 @@
 <?= $this->section('content') ?>
 <div id="kt_content_container" class="container-xxl">
 
+    <div class="card card-flush mb-4">
+        <div class="card-body py-4">
+            <form method="GET" action="<?= site_url('admin/data-lamaran') ?>">
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-semibold">Nama Perusahaan</label>
+                        <input type="text" name="perusahaan" class="form-control form-control-solid" placeholder="Cari nama perusahaan" value="<?= esc($filters['perusahaan'] ?? '') ?>">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-semibold">Posisi</label>
+                        <input type="text" name="posisi" class="form-control form-control-solid" placeholder="Cari posisi" value="<?= esc($filters['posisi'] ?? '') ?>">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <button type="submit" class="btn btn-primary me-2">Filter</button>
+                        <a href="<?= site_url('admin/data-lamaran') ?>" class="btn btn-light">Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm mb-5 mb-xl-8">
         <div class="card-header border-0 pt-5">
             <h3 class="card-title align-items-start flex-column">
@@ -72,17 +93,6 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <?php if (!empty($item['logo_perusahaan'])): ?>
-                                                <div class="symbol symbol-40px me-3">
-                                                    <img src="<?= base_url('uploads/logo/' . $item['logo_perusahaan']) ?>" alt="Logo" class="symbol-label" style="object-fit: cover;">
-                                                </div>
-                                            <?php else: ?>
-                                                <div class="symbol symbol-40px me-3">
-                                                    <div class="symbol-label bg-light text-muted">
-                                                        <i class="bi bi-building fs-2"></i>
-                                                    </div>
-                                                </div>
-                                            <?php endif; ?>
                                             <span class="text-dark fw-semibold">
                                                 <?= esc($item['nama_perusahaan'] ?? '-') ?>
                                             </span>
@@ -118,7 +128,7 @@
                                                 $statusClass = 'badge-primary';
                                                 $statusText = 'Diproses';
                                                 break;
-                                            case 'lolos verifikasi':
+                                            case 'lolos_verifikasi':
                                                 $statusClass = 'badge-success';
                                                 $statusText = 'Lolos Verifikasi';
                                                 break;
@@ -126,9 +136,13 @@
                                                 $statusClass = 'badge-secondary';
                                                 $statusText = 'Wawancara';
                                                 break;
-                                            case 'tidak lolos':
+                                            case 'tidak_lolos':
                                                 $statusClass = 'badge-danger';
                                                 $statusText = 'Tidak Lolos';
+                                                break;
+                                            case 'diterima':
+                                                $statusClass = 'badge-success';
+                                                $statusText = 'Diterima';
                                                 break;
                                             default:
                                                 $statusClass = 'badge-light';
@@ -163,6 +177,7 @@
                                                 data-bs-target="#editModal"
                                                 data-id="<?= $item['id'] ?>"
                                                 data-status="<?= $item['status'] ?? '' ?>"
+                                                data-tanggal-wawancara="<?= $item['tanggal_wawancara'] ?? '' ?>"
                                                 data-catatan="<?= $item['catatan'] ?? '' ?>"
                                                 title="Edit Status">
                                                 <span class="svg-icon svg-icon-3">
@@ -234,8 +249,15 @@
                                     <option value="diproses">Diproses</option>
                                     <option value="lolos_verifikasi">Lolos Verifikasi</option>
                                     <option value="wawancara">Wawancara</option>
-                                    <option value="tidak lolos">Tidak Lolos</option>
+                                    <option value="tidak_lolos">Tidak Lolos</option>
+                                    <option value="diterima">Diterima</option>
                                 </select>
+                            </div>
+                            <div class="d-flex flex-column mb-8 fv-row d-none" id="fieldTanggalWawancara">
+                                <label class="d-flex align-items-center fs-6 fw-semibold mb-2">
+                                    <span class="required">Tanggal Wawancara</span>
+                                </label>
+                                <input type="date" class="form-control form-control-solid" name="tanggal_wawancara" id="editTanggalWawancara">
                             </div>
                             <div class="d-flex flex-column mb-8 fv-row">
                                 <label class="d-flex align-items-center fs-6 fw-semibold mb-2">Catatan</label>
@@ -272,24 +294,45 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         const editStatusModal = document.getElementById('editModal');
+        const editStatus = document.getElementById('editStatus');
+        const fieldTanggalWawancara = document.getElementById('fieldTanggalWawancara');
+        const editTanggalWawancara = document.getElementById('editTanggalWawancara');
+
+        function toggleTanggalWawancara(status) {
+            if (status === 'wawancara') {
+                fieldTanggalWawancara.classList.remove('d-none');
+                editTanggalWawancara.setAttribute('required', 'required');
+            } else {
+                fieldTanggalWawancara.classList.add('d-none');
+                editTanggalWawancara.removeAttribute('required');
+                editTanggalWawancara.value = '';
+            }
+        }
+
+        editStatus.addEventListener('change', function() {
+            toggleTanggalWawancara(this.value);
+        });
 
         editStatusModal.addEventListener('show.bs.modal', function(event) {
             const button = event.relatedTarget;
             const id = button.getAttribute('data-id');
             const status = button.getAttribute('data-status');
             const catatan = button.getAttribute('data-catatan');
+            const tanggalWawancara = button.getAttribute('data-tanggal-wawancara');
 
-            // Set action form
             const form = document.getElementById('kt_modal_edit_form');
             const baseUrl = '<?= site_url('admin/data-lamaran/update/') ?>';
             form.setAttribute('action', baseUrl + id);
 
-            // Debug - hapus setelah berhasil
-            console.log('Action set to:', form.getAttribute('action'));
-
-            // Set nilai field
             document.getElementById('editStatus').value = status;
             document.getElementById('editCatatan').value = catatan;
+            editTanggalWawancara.value = '';
+
+            if (status === 'wawancara' && tanggalWawancara) {
+                editTanggalWawancara.value = tanggalWawancara.substring(0, 10);
+            }
+
+            toggleTanggalWawancara(status);
         });
     });
 </script>

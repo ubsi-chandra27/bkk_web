@@ -15,6 +15,7 @@
                     data-id="<?= $lowongan['id'] ?>"
                     data-id_perusahaan="<?= $lowongan['id_perusahaan'] ?>"
                     data-posisi="<?= esc($lowongan['posisi']) ?>"
+                    data-gaji="<?= esc($lowongan['gaji']) ?>"
                     data-jenis_pekerjaan="<?= esc($lowongan['jenis_pekerjaan']) ?>"
                     data-lokasi_kerja="<?= esc($lowongan['lokasi_kerja'] ?? '') ?>"
                     data-batas_lamaran="<?= esc($lowongan['batas_lamaran'] ?? '') ?>"
@@ -64,15 +65,20 @@
                     <div class="separator mb-7"></div>
 
                     <div class="row gx-5 gy-4 mb-7">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="fw-semibold text-gray-500 fs-7 mb-1">Batas Lamaran</div>
                             <div class="text-gray-800 fw-bold"><?= esc($lowongan['batas_lamaran'] ?? '-') ?></div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="fw-semibold text-gray-500 fs-7 mb-1">Lokasi Kerja</div>
                             <div class="text-gray-800 fw-bold"><?= esc($lowongan['lokasi_kerja'] ?? $lowongan['kota'] ?? '-') ?></div>
                         </div>
-                        <div class="col-md-4">
+
+                        <div class="col-md-3">
+                            <div class="fw-semibold text-gray-500 fs-7 mb-1">Gaji</div>
+                            <div class="text-gray-800 fw-bold"><?= esc($lowongan['gaji'] ?? '-') ?></div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="fw-semibold text-gray-500 fs-7 mb-1">Bidang Usaha</div>
                             <div class="text-gray-800 fw-bold"><?= esc($lowongan['bidang_usaha'] ?? '-') ?></div>
                         </div>
@@ -164,10 +170,6 @@
                         <div class="fw-semibold text-gray-500 fs-7 mb-1">Lokasi</div>
                         <div class="text-gray-800"><?= esc($lowongan['lokasi_kerja'] ?? $lowongan['kota'] ?? '-') ?></div>
                     </div>
-                    <div class="mb-8">
-                        <div class="fw-semibold text-gray-500 fs-7 mb-1">Email</div>
-                        <div class="text-primary"><?= esc($lowongan['email_perusahaan'] ?? '-') ?></div>
-                    </div>
 
                     <a href="<?= site_url('admin/data-lowongan') ?>" class="btn btn-light-primary w-100 fs-7">
                         <i class="bi bi-arrow-left me-2"></i>Kembali ke Daftar Lowongan
@@ -178,9 +180,121 @@
 
     </div>
 </div>
-
-<!-- Modal Edit Lowongan (tidak berubah) -->
-<!-- ... sama seperti sebelumnya ... -->
+<!-- ===== Modal Edit ===== -->
+<div class="modal fade" id="editLowonganModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mw-750px">
+        <div class="modal-content rounded">
+            <div class="modal-header pb-0 border-0 justify-content-end">
+                <div class="btn btn-sm btn-icon btn-active-color-primary" data-bs-dismiss="modal">
+                    <span class="svg-icon svg-icon-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor" />
+                            <rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor" />
+                        </svg>
+                    </span>
+                </div>
+            </div>
+            <div class="modal-body scroll-y px-10 px-lg-15 pt-0 pb-15">
+                <form id="formEditLowongan" action="" method="POST"
+                    data-action-template="<?= site_url('admin/data-lowongan/update/:id') ?>">
+                    <?= csrf_field() ?>
+                    <div class="mb-13 text-center">
+                        <h1 class="mb-3">Edit Lowongan</h1>
+                    </div>
+                    <div class="row g-3 mb-8">
+                        <div class="col-md-6">
+                            <div class="d-flex flex-column mb-8 fv-row">
+                                <label class="fs-6 fw-semibold mb-2"><span class="required">Perusahaan</span></label>
+                                <select class="form-control form-control-solid" name="id_perusahaan" id="editIdPerusahaan" required>
+                                    <option value="">-- Pilih Perusahaan --</option>
+                                    <?php foreach ($perusahaan as $p): ?>
+                                        <option value="<?= $p['id'] ?>"><?= esc($p['nama_perusahaan']) ?></option>
+                                    <?php endforeach ?>
+                                </select>
+                            </div>
+                            <div class="d-flex flex-column mb-8 fv-row">
+                                <label class="fs-6 fw-semibold mb-2"><span class="required">Posisi</span></label>
+                                <input type="text" class="form-control form-control-solid" name="posisi" id="editPosisi" required />
+                            </div>
+                            <div class="d-flex flex-column mb-8 fv-row">
+                                <label class="fs-6 fw-semibold mb-2"><span class="required">Gaji</span></label>
+                                <input type="text" class="form-control form-control-solid" name="gaji" id="editGaji" required />
+                            </div>
+                            <div class="d-flex flex-column mb-8 fv-row">
+                                <label class="fs-6 fw-semibold mb-2"><span class="required">Jenis Pekerjaan</span></label>
+                                <select class="form-control form-control-solid" name="jenis_pekerjaan" id="editJenisPekerjaan" required>
+                                    <option value="fulltime">Full Time</option>
+                                    <option value="parttime">Part Time</option>
+                                    <option value="magang">Magang</option>
+                                    <option value="kontrak">Kontrak</option>
+                                </select>
+                            </div>
+                            <div class="d-flex flex-column mb-8 fv-row">
+                                <label class="fs-6 fw-semibold mb-2">Lokasi Kerja</label>
+                                <input type="text" class="form-control form-control-solid" name="lokasi_kerja" id="editLokasiKerja" />
+                            </div>
+                            <div class="d-flex flex-column mb-8 fv-row">
+                                <label class="fs-6 fw-semibold mb-2"><span class="required">Batas Lamaran</span></label>
+                                <input type="date" class="form-control form-control-solid" name="batas_lamaran" id="editBatasLamaran" required />
+                            </div>
+                            <div class="d-flex flex-column mb-8 fv-row">
+                                <label class="fs-6 fw-semibold mb-2"><span class="required">Status</span></label>
+                                <select class="form-control form-control-solid" name="status" id="editStatus" required>
+                                    <option value="draft">Draft</option>
+                                    <option value="aktif">Aktif</option>
+                                    <option value="ditutup">Ditutup</option>
+                                    <option value="kadaluarsa">Kadaluarsa</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex flex-column mb-8 fv-row">
+                                <label class="fs-6 fw-semibold mb-2">Deskripsi Pekerjaan</label>
+                                <textarea class="form-control form-control-solid" name="deskripsi_pekerjaan" id="editDeskripsi" rows="3"></textarea>
+                            </div>
+                            <div class="d-flex flex-column mb-8 fv-row">
+                                <label class="fs-6 fw-semibold mb-2">Kualifikasi</label>
+                                <textarea class="form-control form-control-solid" name="kualifikasi" id="editKualifikasi" rows="3"></textarea>
+                            </div>
+                            <div class="d-flex flex-column mb-8 fv-row">
+                                <label class="fs-6 fw-semibold mb-3">Jurusan / Keahlian</label>
+                                <div class="d-flex flex-column gap-2">
+                                    <?php foreach ($jurusan as $j): ?>
+                                        <label class="d-flex align-items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" class="form-check-input edit-jurusan-cb" name="jurusan[]" value="<?= $j['id'] ?>" />
+                                            <span class="fs-6 fw-semibold text-gray-700">
+                                                <?= esc($j['kompetensi_keahlian']) ?>
+                                                <?php if ($j['akronim']): ?>
+                                                    <span class="text-muted">(<?= esc($j['akronim']) ?>)</span>
+                                                <?php endif ?>
+                                            </span>
+                                        </label>
+                                    <?php endforeach ?>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column mb-8 fv-row">
+                                <label class="fs-6 fw-semibold mb-3">Syarat Berkas</label>
+                                <div class="d-flex flex-column gap-2">
+                                    <?php foreach ($jenisBerkas as $jb): ?>
+                                        <label class="d-flex align-items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" class="form-check-input edit-berkas-cb" name="jenis_berkas[]" value="<?= $jb['id'] ?>" />
+                                            <span class="fs-6 fw-semibold text-gray-700"><?= esc($jb['nama_berkas']) ?></span>
+                                        </label>
+                                    <?php endforeach ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="reset" class="btn btn-light me-3" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Perbarui</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ===== /Modal Edit ===== -->
 
 <?= $this->endSection() ?>
 
@@ -192,6 +306,7 @@
 
         $('#editIdPerusahaan').val(btn.data('id_perusahaan'));
         $('#editPosisi').val(btn.data('posisi'));
+        $('#editGaji').val(btn.data('gaji'));
         $('#editJenisPekerjaan').val(btn.data('jenis_pekerjaan'));
         $('#editLokasiKerja').val(btn.data('lokasi_kerja'));
         $('#editBatasLamaran').val(btn.data('batas_lamaran'));
@@ -206,6 +321,33 @@
 
         const actionTemplate = form.data('action-template');
         form.attr('action', actionTemplate.replace(':id', btn.data('id')));
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const input = document.getElementById('editGaji');
+        if (!input) return;
+
+        function formatRupiah(angka) {
+            // ambil hanya angka
+            let number_string = angka.replace(/[^,\d]/g, '').toString();
+
+            let split = number_string.split(',');
+            let sisa = split[0].length % 3;
+            let rupiah = split[0].substr(0, sisa);
+            let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                let separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            return rupiah ? 'Rp ' + rupiah : '';
+        }
+
+        input.addEventListener('input', function(e) {
+            input.value = formatRupiah(this.value);
+        });
+
     });
 </script>
 <?= $this->endSection() ?>

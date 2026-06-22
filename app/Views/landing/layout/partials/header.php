@@ -2,10 +2,27 @@
 $uri        = service('uri');
 $currentUrl = current_url();
 
-function isActive(string $routeName): bool
+function isActive(string $routeName, bool $exact = false): bool
 {
-    return current_url() === site_url($routeName)
-        || str_starts_with(current_url(), site_url($routeName . '/'));
+    $current = rtrim(current_url(), '/');
+    $target  = rtrim(site_url($routeName), '/');
+
+    if ($exact || $routeName === '') {
+        return $current === $target;
+    }
+
+    return $current === $target
+        || str_starts_with($current, $target . '/');
+}
+
+function isDropdownActive(array $routeNames): bool
+{
+    foreach ($routeNames as $route) {
+        if (isActive($route)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 $session    = session();
@@ -24,7 +41,7 @@ $userAvatar = $session->get('foto')
 <div class="mb-0" id="home">
     <div class="bgi-no-repeat bgi-size-cover bgi-position-x-center bgi-position-y-bottom"
         style="background-image: linear-gradient(rgba(19,38,60,0.45), rgba(19,38,60,0.45)),
-                url('<?= base_url('assets/media/illustrations/gemini.png') ?>');">
+                url('<?= base_url('assets/media/illustrations/bg3.png') ?>');">
 
         <!--begin::Sticky Header-->
         <div class="landing-header"
@@ -70,26 +87,32 @@ $userAvatar = $session->get('foto')
                             id="kt_landing_menu" data-kt-menu="true">
 
                             <div class="menu-item">
-                                <a class="menu-link nav-link <?= isActive('') || isActive('beranda') ? 'active' : '' ?> py-3 px-4 px-xxl-6"
+                                <a class="menu-link nav-link <?= isActive('') ? 'active' : '' ?> py-3 px-4 px-xxl-6"
                                     href="<?= site_url('/') ?>">Beranda</a>
                             </div>
 
+                            <?php if ($isLoggedIn && $userRole == 4): ?>
+                                <div class="menu-item">
+                                    <a class="menu-link nav-link <?= isActive('tracer-study') ? 'active' : '' ?> py-3 px-4 px-xxl-6"
+                                        href="<?= site_url('tracer-study') ?>">Isi Form Tracer</a>
+                                </div>
+                            <?php endif; ?>
+
                             <!-- Dropdown Informasi -->
-                            <div class="menu-item" data-kt-menu-trigger="hover" data-kt-menu-placement="bottom-start">
-                                <span class="menu-link nav-link py-3 px-4 px-xxl-6">
+                            <div class="menu-item  <?= isActive('tracer-alumni') ? 'here show' : '' ?>" data-kt-menu-trigger="hover" data-kt-menu-placement="bottom-start">
+                                <span class="menu-link nav-link py-3 px-4 px-xxl-6 <?= isActive('tracer-alumni') ? 'active' : '' ?>">
                                     <span class="menu-title">Informasi</span>
                                     <span class="menu-arrow d-lg-none"></span>
                                 </span>
                                 <div class="menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg-light-primary fw-semibold py-4 w-200px">
-                                    <?php if ($isLoggedIn && in_array((int)$userRole, [4])): ?>
-                                        <div class="menu-item px-3">
-                                            <a href="<?= site_url('pelamar/tracer') ?>"
-                                                class="menu-link px-3 <?= isActive('pelamar/tracer') ? 'active' : '' ?>">
-                                                <span class="menu-icon"><i class="fa-solid fa-graduation-cap fs-5"></i></span>
-                                                <span class="menu-title">Tracer Alumni</span>
-                                            </a>
-                                        </div>
-                                    <?php endif; ?>
+
+                                    <div class="menu-item px-3">
+                                        <a href="<?= site_url('tracer-alumni') ?>"
+                                            class="menu-link px-3 <?= isActive('tracer-alumni') ? 'active' : '' ?>">
+                                            <span class="menu-icon"><i class="fa-solid fa-graduation-cap fs-5"></i></span>
+                                            <span class="menu-title">Tracer Alumni</span>
+                                        </a>
+                                    </div>
                                     <div class="menu-item px-3">
                                         <a href="<?= site_url('perusahaan') ?>"
                                             class="menu-link px-3 <?= isActive('perusahaan') ? 'active' : '' ?>">
@@ -111,10 +134,37 @@ $userAvatar = $session->get('foto')
                     <!--begin::Auth Area-->
                     <div class="flex-equal text-end ms-1">
                         <?php if ($isLoggedIn): ?>
-                            <div class="d-inline-flex align-items-center">
+                            <!-- Notification Bell for Pelamar/Alumni -->
+                            <?php if (in_array($userRole, [4, 5])): ?>
+                                <div class="d-inline-flex align-items-center me-2 position-relative">
+                                    <div class="btn btn-icon btn-active-light-primary position-relative w-30px h-30px w-md-40px h-md-40px"
+                                        id="notification-bell-landing"
+                                        data-kt-menu-trigger="click"
+                                        data-kt-menu-attach="parent"
+                                        data-kt-menu-placement="bottom-end">
+                                        <i class="fa-regular fa-bell fs-2"></i>
+                                        <span class="notification-dot position-absolute translate-middle" id="notification-badge-landing" style="display: none;"></span>
+                                    </div>
+
+                                    <!-- Notification Dropdown -->
+                                    <div class="menu menu-sub menu-sub-dropdown menu-column notification-menu w-350px w-lg-375px" data-kt-menu="true" id="notification-dropdown-landing">
+                                        <div class="notification-menu-head">
+                                            <div>
+                                                <div class="notification-title">Notifikasi</div>
+                                                <div class="notification-subtitle"><span id="notif-count-landing">0</span> belum dibaca</div>
+                                            </div>
+                                            <button type="button" class="notification-clear" id="mark-all-read">Bersihkan</button>
+                                        </div>
+                                        <div class="notification-list scroll-y mh-325px" id="notification-list-landing">
+                                            <div class="text-center text-muted py-10" id="notif-empty-landing">Memuat notifikasi...</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
+                            <div class="d-inline-flex align-items-center position-relative">
                                 <div class="cursor-pointer symbol symbol-30px symbol-md-40px"
                                     data-kt-menu-trigger="click"
-                                    data-kt-menu-attach="parent"
                                     data-kt-menu-placement="bottom-end">
                                     <img src="<?= esc($userAvatar) ?>" alt="Avatar"
                                         style="width:45px;height:45px;object-fit:cover;border-radius:.475rem;" />

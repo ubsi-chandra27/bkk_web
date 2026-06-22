@@ -7,6 +7,7 @@ $statusPendaftaranBadge = 'warning';
 $berkasLamaran = $berkasLamaran ?? [];
 $selectedLamaran = $selectedLamaran ?? null;
 $selectedTab = $selectedTab ?? '';
+$canManageRiwayatKerja = (int) session()->get('id_role') !== 3;
 
 if ($statusPendaftaran === 'terdaftar') {
     $statusPendaftaranLabel = 'Terdaftar';
@@ -142,6 +143,12 @@ if ($statusPendaftaran === 'terdaftar') {
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-active-primary me-6"
+                                data-bs-toggle="tab" href="#tab_riwayat_kerja">
+                                <i class="bi bi-building me-2"></i>Riwayat Kerja
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-active-primary me-6"
                                 data-bs-toggle="tab" href="#tab_lamaran">
                                 <i class="bi bi-briefcase me-2"></i>Riwayat Lamaran
                             </a>
@@ -233,22 +240,6 @@ if ($statusPendaftaran === 'terdaftar') {
                                     <div>
                                         <div class="text-muted fs-7">Alamat</div>
                                         <div class="fw-bolder fs-6"><?= esc($pelamar['alamat'] ?? '-') ?></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Tanggal Lahir -->
-                            <div class="col-md-6 mb-6">
-                                <div class="d-flex align-items-center">
-                                    <div class="symbol symbol-40px me-4 bg-light-warning rounded">
-                                        <span class="symbol-label">
-                                            <i class="bi bi-patch-check fs-4 text-warning"></i>
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <div class="text-muted fs-7">Status Pendaftaran</div>
-                                        <div class="fw-bolder fs-6">
-                                            <span class="badge badge-light-<?= $statusPendaftaranBadge ?>"><?= esc($statusPendaftaranLabel) ?></span>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -374,15 +365,17 @@ if ($statusPendaftaran === 'terdaftar') {
 
                                         <div class="separator separator-dashed my-5"></div>
 
-                                        <?php if (!empty($alumni['is_verifikasi'])): ?>
-                                            <span class="badge badge-light-success px-4 py-2">
-                                                <i class="bi bi-patch-check-fill me-1 text-success"></i>Terverifikasi
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="badge badge-light-warning px-4 py-2">
-                                                <i class="bi bi-clock me-1 text-warning"></i>Menunggu Verifikasi
-                                            </span>
-                                        <?php endif ?>
+                                        <?php
+                                        $statusColor = match ($tracer['status'] ?? '') {
+                                            'terkirim'      => 'primary',
+                                            'terverifikasi' => 'info',
+                                            'disetujui'     => 'success',
+                                            default         => 'warning'
+                                        };
+                                        ?>
+                                        <span class="badge badge-light-<?= $statusColor ?> px-4 py-2">
+                                            <?= ucfirst(str_replace('_', ' ', $tracer['status'] ?? '-')) ?>
+                                        </span>
                                     <?php else: ?>
                                         <div class="text-center py-10">
                                             <i class="bi bi-person-badge fs-3x text-gray-400 mb-3 d-block"></i>
@@ -410,20 +403,6 @@ if ($statusPendaftaran === 'terdaftar') {
                                                 <div class="mb-6">
                                                     <div class="text-muted fs-7 mb-1">Status Aktivitas</div>
                                                     <div class="fw-bolder fs-6"><?= esc($tracer['nama_aktivitas'] ?? '-') ?></div>
-                                                </div>
-                                                <div class="mb-6">
-                                                    <div class="text-muted fs-7 mb-2">Status Verifikasi</div>
-                                                    <?php
-                                                    $statusColor = match ($tracer['status'] ?? '') {
-                                                        'terkirim'      => 'primary',
-                                                        'terverifikasi' => 'info',
-                                                        'disetujui'     => 'success',
-                                                        default         => 'warning'
-                                                    };
-                                                    ?>
-                                                    <span class="badge badge-light-<?= $statusColor ?> px-4 py-2">
-                                                        <?= ucfirst(str_replace('_', ' ', $tracer['status'] ?? '-')) ?>
-                                                    </span>
                                                 </div>
                                             </div>
 
@@ -671,16 +650,200 @@ if ($statusPendaftaran === 'terdaftar') {
                 </div>
             </div>
 
-            <!-- Tab Riwayat Lamaran -->
-            <div class="tab-pane fade" id="tab_lamaran">
-                <div class="card">
-                    <div class="card-body text-center py-15">
-                        <i class="bi bi-briefcase fs-3x text-muted mb-4 d-block"></i>
-                        <div class="text-muted fs-5">Belum ada riwayat lamaran</div>
+            <!-- Tab Riwayat Kerja -->
+            <div class="tab-pane fade" id="tab_riwayat_kerja">
+                <div class="card shadow-sm card-flush" id="kt_admin_riwayat_kerja_card">
+                    <div class="card-header border-bottom">
+                        <div class="card-title">
+                            <h3 class="fw-bolder m-0">Riwayat Kerja</h3>
+                        </div>
+                        <?php if ($canManageRiwayatKerja): ?>
+                            <div class="card-toolbar">
+                                <button type="button" class="btn btn-sm btn-primary" id="btnTambahRiwayatKerja">
+                                    <i class="bi bi-plus-lg me-1"></i>Tambah
+                                </button>
+                            </div>
+                        <?php endif ?>
+                    </div>
+                    <div class="card-body p-9">
+                        <div id="riwayatKerjaAlert" class="alert alert-danger d-none mb-6"></div>
+                        <div id="riwayatKerjaList" class="d-flex flex-column gap-5">
+                            <div class="text-center py-15">
+                                <span class="spinner-border spinner-border-sm text-primary me-2"></span>
+                                <span class="text-muted fs-6">Memuat riwayat kerja...</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Tab Riwayat Lamaran -->
+            <div class="tab-pane fade" id="tab_lamaran">
+                <div class="card shadow-sm card-flush">
+                    <div class="card-header border-bottom">
+                        <div class="card-title">
+                            <h3 class="fw-bolder m-0">Riwayat Lamaran</h3>
+                        </div>
+                    </div>
+                    <div class="card-body p-9">
+                        <?php if (!empty($lamaran)): ?>
+                            <div class="d-flex flex-column gap-5">
+                                <?php foreach ($lamaran as $l):
+                                    $statusMap = [
+                                        'menunggu_diverifikasi' => ['color' => 'warning',  'label' => 'Menunggu'],
+                                        'diproses'              => ['color' => 'info',     'label' => 'Diproses'],
+                                        'lolos_verifikasi'      => ['color' => 'primary',  'label' => 'Lolos Verifikasi'],
+                                        'wawancara'             => ['color' => 'dark',     'label' => 'Wawancara'],
+                                        'diterima'              => ['color' => 'success',  'label' => 'Diterima'],
+                                        'ditolak'               => ['color' => 'danger',   'label' => 'Ditolak'],
+                                    ];
+                                    $st = $statusMap[$l['status']] ?? ['color' => 'secondary', 'label' => $l['status']];
+                                    $detailLowonganUrl = !empty($l['id_lowongan']) ? site_url('lowongan/' . $l['id_lowongan']) : null;
+                                ?>
+                                    <div class="card card-bordered">
+                                        <div class="card-body p-6">
+                                            <div class="d-flex align-items-start justify-content-between gap-3">
+
+                                                <!-- Logo + Info lowongan -->
+                                                <div class="d-flex align-items-center gap-4">
+                                                    <div class="symbol symbol-50px">
+                                                        <?php if (!empty($l['logo'])): ?>
+                                                            <span class="symbol-label bg-light-primary">
+                                                                <img src="<?= base_url('uploads/logo/' . $l['logo']) ?>"
+                                                                    alt="logo" class="w-100 h-100 object-fit-contain p-1" />
+                                                            </span>
+                                                        <?php else: ?>
+                                                            <span class="symbol-label bg-light-primary text-primary fs-4 fw-bold">
+                                                                <?= strtoupper(substr($l['nama_perusahaan'] ?? 'P', 0, 2)) ?>
+                                                            </span>
+                                                        <?php endif ?>
+                                                    </div>
+                                                    <div>
+                                                        <?php if ($detailLowonganUrl): ?>
+                                                            <a href="<?= $detailLowonganUrl ?>" class="fw-bolder fs-5 text-gray-900 text-hover-primary mb-1 d-inline-block">
+                                                                <?= esc($l['posisi']) ?>
+                                                            </a>
+                                                        <?php else: ?>
+                                                            <div class="fw-bolder fs-5 text-gray-900 mb-1">
+                                                                <?= esc($l['posisi']) ?>
+                                                            </div>
+                                                        <?php endif ?>
+                                                        <div class="text-primary fw-semibold fs-7 mb-1">
+                                                            <i class="bi bi-building me-1"></i>
+                                                            <?= esc($l['nama_perusahaan'] ?? '-') ?>
+                                                        </div>
+                                                        <div class="text-muted fs-8">
+                                                            <i class="bi bi-calendar me-1"></i>
+                                                            Melamar: <?= date('d M Y', strtotime($l['tanggal_melamar'])) ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Badge status -->
+                                                <span class="badge badge-light-<?= $st['color'] ?> px-4 py-2 text-nowrap">
+                                                    <?= $st['label'] ?>
+                                                </span>
+
+                                            </div>
+
+                                            <!-- Catatan admin (jika ada) -->
+                                            <?php if (!empty($l['catatan'])): ?>
+                                                <div class="mt-4 p-4 bg-light rounded">
+                                                    <div class="text-muted fs-7 fw-semibold mb-1">
+                                                        <i class="bi bi-chat-left-text me-1"></i>Catatan dari Admin:
+                                                    </div>
+                                                    <div class="fs-6 text-gray-800"><?= esc($l['catatan']) ?></div>
+                                                </div>
+                                            <?php endif ?>
+
+                                            <?php if ($detailLowonganUrl): ?>
+                                                <div class="mt-4">
+                                                    <a href="<?= $detailLowonganUrl ?>" class="btn btn-sm btn-light-primary">
+                                                        <i class="bi bi-box-arrow-up-right me-2"></i>Detail Lowongan
+                                                    </a>
+                                                </div>
+                                            <?php endif ?>
+
+                                        </div>
+                                    </div>
+                                <?php endforeach ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-15">
+                                <i class="bi bi-briefcase fs-3x text-gray-400 mb-5 d-block"></i>
+                                <div class="text-muted fs-5 mb-5">Belum ada riwayat lamaran</div>
+                                <a href="<?= site_url('lowongan') ?>" class="btn btn-primary">
+                                    <i class="bi bi-search me-2"></i>Cari Lowongan
+                                </a>
+                            </div>
+                        <?php endif ?>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal fade" id="modalRiwayatKerja" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered mw-650px">
+                <div class="modal-content" data-kt-riwayat-kerja-modal="true">
+                    <form id="formRiwayatKerja" class="form">
+                        <div class="modal-header">
+                            <h2 class="fw-bolder" id="modalRiwayatKerjaTitle">Tambah Riwayat Kerja</h2>
+                            <button type="button" class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" aria-label="Close">
+                                <i class="bi bi-x-lg fs-4"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body py-10 px-lg-17">
+                            <input type="hidden" name="id" id="riwayatKerjaId">
+
+                            <div class="row g-6">
+                                <div class="col-md-6">
+                                    <label class="required form-label">Nama Perusahaan</label>
+                                    <input type="text" name="nama_perusahaan" id="namaPerusahaan" class="form-control form-control-solid" maxlength="150" required>
+                                    <div class="invalid-feedback" data-error-for="nama_perusahaan"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="required form-label">Posisi / Jabatan</label>
+                                    <input type="text" name="posisi_jabatan" id="posisiJabatan" class="form-control form-control-solid" maxlength="100" required>
+                                    <div class="invalid-feedback" data-error-for="posisi_jabatan"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="required form-label">Tanggal Mulai</label>
+                                    <input type="date" name="tanggal_mulai" id="tanggalMulai" class="form-control form-control-solid" required>
+                                    <div class="invalid-feedback" data-error-for="tanggal_mulai"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tanggal Selesai</label>
+                                    <input type="date" name="tanggal_selesai" id="tanggalSelesai" class="form-control form-control-solid">
+                                    <div class="invalid-feedback" data-error-for="tanggal_selesai"></div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check form-check-custom form-check-solid">
+                                        <input class="form-check-input" type="checkbox" value="1" name="is_masih_bekerja" id="isMasihBekerja">
+                                        <label class="form-check-label fw-semibold" for="isMasihBekerja">
+                                            Masih bekerja di perusahaan ini
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Deskripsi Kerja</label>
+                                    <textarea name="deskripsi_kerja" id="deskripsiKerja" class="form-control form-control-solid" rows="4" maxlength="2000"></textarea>
+                                    <div class="invalid-feedback" data-error-for="deskripsi_kerja"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer flex-center">
+                            <button type="button" class="btn btn-light me-3" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary" id="btnSimpanRiwayatKerja">
+                                <span class="indicator-label">Simpan</span>
+                                <span class="indicator-progress">Menyimpan...
+                                    <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -690,6 +853,308 @@ if ($statusPendaftaran === 'terdaftar') {
     document.addEventListener('DOMContentLoaded', function() {
         var preferredTab = '<?= esc($selectedTab, 'js') ?>';
         var hash = window.location.hash || (preferredTab ? '#' + preferredTab : '');
+        var csrfHash = '<?= csrf_hash() ?>';
+        var csrfHeader = '<?= csrf_header() ?>';
+        var riwayatKerjaUrl = '<?= site_url('admin/data-pelamar/profil/' . $user['id'] . '/riwayat-kerja') ?>';
+        var canManageRiwayatKerja = <?= $canManageRiwayatKerja ? 'true' : 'false' ?>;
+        var riwayatKerjaLoaded = false;
+        var riwayatKerjaData = new Map();
+        var modalEl = document.getElementById('modalRiwayatKerja');
+        var modal = modalEl ? new bootstrap.Modal(modalEl) : null;
+        var form = document.getElementById('formRiwayatKerja');
+        var listEl = document.getElementById('riwayatKerjaList');
+        var alertEl = document.getElementById('riwayatKerjaAlert');
+        var submitBtn = document.getElementById('btnSimpanRiwayatKerja');
+        var tanggalSelesai = document.getElementById('tanggalSelesai');
+        var isMasihBekerja = document.getElementById('isMasihBekerja');
+
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, function(char) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[char];
+            });
+        }
+
+        function formatTanggal(value) {
+            if (!value) return '-';
+            var parts = String(value).split('-');
+            if (parts.length !== 3) return value;
+            return parts[2] + '/' + parts[1] + '/' + parts[0];
+        }
+
+        function updateCsrf(response) {
+            if (response && response.csrfHash) {
+                csrfHash = response.csrfHash;
+            }
+        }
+
+        function showAlert(message) {
+            if (!alertEl) return;
+            alertEl.textContent = message;
+            alertEl.classList.remove('d-none');
+        }
+
+        function hideAlert() {
+            if (!alertEl) return;
+            alertEl.textContent = '';
+            alertEl.classList.add('d-none');
+        }
+
+        function showNotification(icon, message) {
+            if (window.Swal) {
+                Swal.fire({
+                    text: message,
+                    icon: icon,
+                    buttonsStyling: false,
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'btn btn-primary'
+                    }
+                });
+                return;
+            }
+
+            alert(message);
+        }
+
+        function setSubmitLoading(isLoading) {
+            if (!submitBtn) return;
+            submitBtn.disabled = isLoading;
+            submitBtn.setAttribute('data-kt-indicator', isLoading ? 'on' : 'off');
+        }
+
+        function resetValidation() {
+            if (!form) return;
+            form.querySelectorAll('.is-invalid').forEach(function(el) {
+                el.classList.remove('is-invalid');
+            });
+            form.querySelectorAll('[data-error-for]').forEach(function(el) {
+                el.textContent = '';
+            });
+        }
+
+        function showValidation(errors) {
+            resetValidation();
+            Object.keys(errors || {}).forEach(function(field) {
+                var input = form.querySelector('[name="' + field + '"]');
+                var feedback = form.querySelector('[data-error-for="' + field + '"]');
+                if (input) input.classList.add('is-invalid');
+                if (feedback) feedback.textContent = errors[field];
+            });
+        }
+
+        function syncTanggalSelesaiState() {
+            if (!tanggalSelesai || !isMasihBekerja) return;
+            if (isMasihBekerja.checked) {
+                tanggalSelesai.value = '';
+                tanggalSelesai.disabled = true;
+            } else {
+                tanggalSelesai.disabled = false;
+            }
+        }
+
+        function renderLoading() {
+            listEl.innerHTML = '<div class="text-center py-15"><span class="spinner-border spinner-border-sm text-primary me-2"></span><span class="text-muted fs-6">Memuat riwayat kerja...</span></div>';
+        }
+
+        function renderEmpty() {
+            var createButton = canManageRiwayatKerja ? '<button type="button" class="btn btn-primary" data-action="create"><i class="bi bi-plus-lg me-2"></i>Tambah Riwayat Kerja</button>' : '';
+            listEl.innerHTML = '<div class="text-center py-15"><i class="bi bi-building fs-3x text-gray-400 mb-5 d-block"></i><div class="text-muted fs-5 mb-5">Belum ada riwayat kerja</div>' + createButton + '</div>';
+        }
+
+        function renderList(items) {
+            riwayatKerjaData = new Map();
+
+            if (!items.length) {
+                renderEmpty();
+                return;
+            }
+
+            listEl.innerHTML = items.map(function(item) {
+                riwayatKerjaData.set(String(item.id), item);
+                var periodeAkhir = String(item.is_masih_bekerja) === '1' ? 'Sekarang' : formatTanggal(item.tanggal_selesai);
+                var deskripsi = item.deskripsi_kerja ? escapeHtml(item.deskripsi_kerja).replace(/\n/g, '<br>') : '<span class="text-muted">Tidak ada deskripsi</span>';
+                var actionButtons = canManageRiwayatKerja ? '<div class="d-flex gap-2">' +
+                    '<button type="button" class="btn btn-sm btn-light-primary" data-action="edit" data-id="' + item.id + '"><i class="bi bi-pencil me-1"></i>Edit</button>' +
+                    '<button type="button" class="btn btn-sm btn-light-danger" data-action="delete" data-id="' + item.id + '"><i class="bi bi-trash me-1"></i>Hapus</button>' +
+                    '</div>' : '';
+
+                return '<div class="card card-bordered">' +
+                    '<div class="card-body p-6">' +
+                    '<div class="d-flex flex-column flex-md-row align-items-md-start justify-content-between gap-4">' +
+                    '<div class="d-flex align-items-start gap-4">' +
+                    '<div class="symbol symbol-45px">' +
+                    '<span class="symbol-label bg-light-primary"><i class="bi bi-building text-primary fs-3"></i></span>' +
+                    '</div>' +
+                    '<div>' +
+                    '<div class="fw-bolder fs-5 text-gray-900 mb-1">' + escapeHtml(item.nama_perusahaan) + '</div>' +
+                    '<div class="text-primary fw-semibold fs-7 mb-2">' + escapeHtml(item.posisi_jabatan) + '</div>' +
+                    '<span class="badge badge-light-info"><i class="bi bi-calendar3 me-1"></i>' + escapeHtml(formatTanggal(item.tanggal_mulai)) + ' - ' + escapeHtml(periodeAkhir) + '</span>' +
+                    '</div>' +
+                    '</div>' +
+                    actionButtons +
+                    '</div>' +
+                    '<div class="separator separator-dashed my-5"></div>' +
+                    '<div class="text-gray-700 fs-6">' + deskripsi + '</div>' +
+                    '</div>' +
+                    '</div>';
+            }).join('');
+        }
+
+        function requestJson(url, options) {
+            var requestOptions = options || {};
+            requestOptions.headers = Object.assign({
+                'X-Requested-With': 'XMLHttpRequest',
+                [csrfHeader]: csrfHash
+            }, requestOptions.headers || {});
+
+            return fetch(url, requestOptions)
+                .then(function(response) {
+                    return response.json()
+                        .catch(function() {
+                            return {
+                                success: false,
+                                message: 'Response server tidak valid'
+                            };
+                        })
+                        .then(function(json) {
+                            updateCsrf(json);
+                            if (!response.ok || !json.success) {
+                                var error = new Error(json.message || 'Request gagal diproses');
+                                error.payload = json;
+                                throw error;
+                            }
+                            return json;
+                        });
+                });
+        }
+
+        function loadRiwayatKerja(force) {
+            if (!force && riwayatKerjaLoaded) return;
+            hideAlert();
+            renderLoading();
+
+            requestJson(riwayatKerjaUrl)
+                .then(function(response) {
+                    riwayatKerjaLoaded = true;
+                    renderList(response.data || []);
+                })
+                .catch(function(error) {
+                    showAlert(error.message);
+                    renderEmpty();
+                });
+        }
+
+        function openCreateModal() {
+            form.reset();
+            document.getElementById('riwayatKerjaId').value = '';
+            document.getElementById('modalRiwayatKerjaTitle').textContent = 'Tambah Riwayat Kerja';
+            resetValidation();
+            syncTanggalSelesaiState();
+            modal.show();
+        }
+
+        function openEditModal(id) {
+            var item = riwayatKerjaData.get(String(id));
+            if (!item) return;
+
+            form.reset();
+            resetValidation();
+            document.getElementById('modalRiwayatKerjaTitle').textContent = 'Edit Riwayat Kerja';
+            document.getElementById('riwayatKerjaId').value = item.id;
+            document.getElementById('namaPerusahaan').value = item.nama_perusahaan || '';
+            document.getElementById('posisiJabatan').value = item.posisi_jabatan || '';
+            document.getElementById('tanggalMulai').value = item.tanggal_mulai || '';
+            document.getElementById('tanggalSelesai').value = item.tanggal_selesai || '';
+            document.getElementById('deskripsiKerja').value = item.deskripsi_kerja || '';
+            isMasihBekerja.checked = String(item.is_masih_bekerja) === '1';
+            syncTanggalSelesaiState();
+            modal.show();
+        }
+
+        function submitRiwayatKerja(e) {
+            e.preventDefault();
+            resetValidation();
+            syncTanggalSelesaiState();
+
+            var id = document.getElementById('riwayatKerjaId').value;
+            var payload = {
+                nama_perusahaan: document.getElementById('namaPerusahaan').value,
+                posisi_jabatan: document.getElementById('posisiJabatan').value,
+                tanggal_mulai: document.getElementById('tanggalMulai').value,
+                tanggal_selesai: tanggalSelesai.disabled ? '' : tanggalSelesai.value,
+                is_masih_bekerja: isMasihBekerja.checked ? '1' : '0',
+                deskripsi_kerja: document.getElementById('deskripsiKerja').value
+            };
+
+            setSubmitLoading(true);
+            requestJson(id ? riwayatKerjaUrl + '/' + id : riwayatKerjaUrl, {
+                    method: id ? 'PUT' : 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(function(response) {
+                    modal.hide();
+                    showNotification('success', response.message);
+                    loadRiwayatKerja(true);
+                })
+                .catch(function(error) {
+                    if (error.payload && error.payload.errors) {
+                        showValidation(error.payload.errors);
+                        return;
+                    }
+                    showNotification('error', error.message);
+                })
+                .finally(function() {
+                    setSubmitLoading(false);
+                });
+        }
+
+        function deleteRiwayatKerja(id) {
+            var item = riwayatKerjaData.get(String(id));
+            var namaPerusahaan = item ? item.nama_perusahaan : 'riwayat kerja ini';
+            var confirmDelete = function(callback) {
+                if (window.Swal) {
+                    Swal.fire({
+                        text: 'Hapus riwayat kerja di ' + namaPerusahaan + '?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        buttonsStyling: false,
+                        confirmButtonText: 'Ya, hapus',
+                        cancelButtonText: 'Batal',
+                        customClass: {
+                            confirmButton: 'btn btn-danger',
+                            cancelButton: 'btn btn-light'
+                        }
+                    }).then(function(result) {
+                        if (result.isConfirmed) callback();
+                    });
+                    return;
+                }
+
+                if (confirm('Hapus riwayat kerja di ' + namaPerusahaan + '?')) callback();
+            };
+
+            confirmDelete(function() {
+                requestJson(riwayatKerjaUrl + '/' + id, {
+                        method: 'DELETE'
+                    })
+                    .then(function(response) {
+                        showNotification('success', response.message);
+                        loadRiwayatKerja(true);
+                    })
+                    .catch(function(error) {
+                        showNotification('error', error.message);
+                    });
+            });
+        }
 
         if (hash) {
             var tabEl = document.querySelector('a[href="' + hash + '"]');
@@ -700,8 +1165,39 @@ if ($statusPendaftaran === 'terdaftar') {
 
         document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function(el) {
             el.addEventListener('shown.bs.tab', function(e) {
-                history.replaceState(null, null, e.target.getAttribute('href'));
+                var target = e.target.getAttribute('href');
+                history.replaceState(null, null, target);
+                if (target === '#tab_riwayat_kerja') {
+                    loadRiwayatKerja();
+                }
             });
+        });
+
+        if (hash === '#tab_riwayat_kerja') {
+            loadRiwayatKerja();
+        }
+
+        if (canManageRiwayatKerja) {
+            document.getElementById('btnTambahRiwayatKerja').addEventListener('click', openCreateModal);
+            isMasihBekerja.addEventListener('change', syncTanggalSelesaiState);
+            form.addEventListener('submit', submitRiwayatKerja);
+        }
+        listEl.addEventListener('click', function(e) {
+            var button = e.target.closest('[data-action]');
+            if (!button) return;
+            if (!canManageRiwayatKerja) return;
+
+            if (button.dataset.action === 'create') {
+                openCreateModal();
+            }
+
+            if (button.dataset.action === 'edit') {
+                openEditModal(button.dataset.id);
+            }
+
+            if (button.dataset.action === 'delete') {
+                deleteRiwayatKerja(button.dataset.id);
+            }
         });
     });
 </script>

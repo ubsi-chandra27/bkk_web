@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 23 Apr 2026 pada 14.44
+-- Waktu pembuatan: 08 Jun 2026 pada 13.43
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `app_bkk_web`
+-- Database: `bkk_tracer`
 --
 
 -- --------------------------------------------------------
@@ -42,12 +42,65 @@ CREATE TABLE `migrations` (
 --
 
 INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`, `batch`) VALUES
-(1, '2026-04-21-140800', 'App\\Database\\Migrations\\AlterTracerAktivitasNullable', 'default', 'App', 1776780407, 1),
-(2, '2026-04-22-090000', 'App\\Database\\Migrations\\AddStatusPendaftaranToPelamar', 'default', 'App', 1776861631, 2),
-(3, '2026-04-22-140800', 'App\\Database\\Migrations\\CreateTbJenisBerkas', 'default', 'App', 1776866953, 3),
-(4, '2026-04-22-140833', 'App\\Database\\Migrations\\CreateTbSyaratBerkas', 'default', 'App', 1776867168, 4),
-(5, '2026-04-22-110000', 'App\\Database\\Migrations\\RefactorBerkasStructure', 'default', 'App', 1776868513, 5),
-(6, '2026-04-23-065117', 'App\\Database\\Migrations\\CreateTbBerkasLamaran', 'default', 'App', 1776927450, 6);
+(1, '2026-05-14-000001', 'App\\Database\\Migrations\\CreateTbRoles', 'default', 'App', 1778749092, 1),
+(2, '2026-05-14-000002', 'App\\Database\\Migrations\\CreateTbUsers', 'default', 'App', 1778749092, 1),
+(3, '2026-05-14-000003', 'App\\Database\\Migrations\\CreateTbAdmin', 'default', 'App', 1778749092, 1),
+(4, '2026-05-14-000004', 'App\\Database\\Migrations\\CreateTbAktivitas', 'default', 'App', 1778749092, 1),
+(5, '2026-05-14-000005', 'App\\Database\\Migrations\\CreateTbAngkatan', 'default', 'App', 1778749092, 1),
+(6, '2026-05-14-000006', 'App\\Database\\Migrations\\CreateTbJurusan', 'default', 'App', 1778749092, 1),
+(7, '2026-05-14-000007', 'App\\Database\\Migrations\\CreateTbKerjasama', 'default', 'App', 1778749092, 1),
+(8, '2026-05-14-000008', 'App\\Database\\Migrations\\CreateTbJenisBerkas', 'default', 'App', 1778749092, 1),
+(9, '2026-05-14-000009', 'App\\Database\\Migrations\\CreateTbIdentitasSekolah', 'default', 'App', 1778749092, 1),
+(10, '2026-05-14-000010', 'App\\Database\\Migrations\\CreateTbPerusahaan', 'default', 'App', 1778749092, 1),
+(11, '2026-05-14-000011', 'App\\Database\\Migrations\\CreateTbPelamar', 'default', 'App', 1778749092, 1),
+(12, '2026-05-14-000012', 'App\\Database\\Migrations\\CreateTbAlumni', 'default', 'App', 1778749093, 1),
+(13, '2026-05-14-000013', 'App\\Database\\Migrations\\CreateTbLowongan', 'default', 'App', 1778749093, 1),
+(14, '2026-05-14-000014', 'App\\Database\\Migrations\\CreateTbLowonganJurusan', 'default', 'App', 1778749093, 1),
+(15, '2026-05-14-000015', 'App\\Database\\Migrations\\CreateTbSyaratBerkas', 'default', 'App', 1778749093, 1),
+(16, '2026-05-14-000016', 'App\\Database\\Migrations\\CreateTbLamaran', 'default', 'App', 1778749093, 1),
+(17, '2026-05-14-000017', 'App\\Database\\Migrations\\CreateTbLamaranStatus', 'default', 'App', 1778749093, 1),
+(18, '2026-05-14-000018', 'App\\Database\\Migrations\\CreateTbBerkas', 'default', 'App', 1778749093, 1),
+(19, '2026-05-14-000019', 'App\\Database\\Migrations\\CreateTbBerkasLamaran', 'default', 'App', 1778749093, 1),
+(20, '2026-05-14-000020', 'App\\Database\\Migrations\\CreateTbMou', 'default', 'App', 1778749093, 1),
+(21, '2026-05-14-000021', 'App\\Database\\Migrations\\CreateTbRiwayatKerja', 'default', 'App', 1778749093, 1),
+(22, '2026-05-14-000022', 'App\\Database\\Migrations\\CreateTbTracerAlumni', 'default', 'App', 1778749093, 1),
+(23, '2026-05-14-000023', 'App\\Database\\Migrations\\CreateNotifications', 'default', 'App', 1778749093, 1),
+(24, '2026-05-15-000001', 'App\\Database\\Migrations\\AddPasswordResetToTbUsers', 'default', 'App', 1778858348, 2),
+(25, '2026-05-16-000001', 'App\\Database\\Migrations\\AddEmailVerificationToTbUsers', 'default', 'App', 1778865464, 3),
+(26, '2026-05-19-000001', 'App\\Database\\Migrations\\AddNewNotificationTypes', 'default', 'App', 1779160547, 4);
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `notifications`
+--
+
+CREATE TABLE `notifications` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `user_id` int(11) UNSIGNED NOT NULL COMMENT 'Penerima notifikasi - FK ke tb_users.id',
+  `sender_id` int(11) UNSIGNED DEFAULT NULL COMMENT 'Pengirim notifikasi - FK ke tb_users.id, null jika dari sistem',
+  `type` enum('new_application','status_changed','new_user','tracer_study_submitted') NOT NULL COMMENT 'Kategori notifikasi',
+  `title` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `url` varchar(255) DEFAULT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT 0 COMMENT '0 = belum dibaca, 1 = sudah dibaca',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `notifications`
+--
+
+INSERT INTO `notifications` (`id`, `user_id`, `sender_id`, `type`, `title`, `message`, `url`, `is_read`, `created_at`, `updated_at`) VALUES
+(1, 1, 12, 'new_user', 'Pendaftar Baru', 'Eri Chandra Apriyadi mendaftar sebagai Pelamar Alumni', '/admin/data-pelamar', 0, '2026-05-19 03:31:30', '2026-05-19 03:31:30'),
+(2, 2, 12, 'new_user', 'Pendaftar Baru', 'Eri Chandra Apriyadi mendaftar sebagai Pelamar Alumni', '/admin/data-pelamar', 1, '2026-05-19 03:31:30', '2026-05-19 03:38:30'),
+(3, 1, 9, 'tracer_study_submitted', 'Tracer Study Baru', 'Afillah AJie Pratama telah mengisi data tracer study', '/admin/data-tracer', 0, '2026-05-29 08:09:13', '2026-05-29 08:09:13'),
+(4, 2, 9, 'tracer_study_submitted', 'Tracer Study Baru', 'Afillah AJie Pratama telah mengisi data tracer study', '/admin/data-tracer', 1, '2026-05-29 08:09:13', '2026-05-29 08:10:41'),
+(5, 1, 16, 'new_user', 'Pendaftar Baru', 'Bella Shafa mendaftar sebagai Pelamar Alumni', '/admin/data-pelamar', 0, '2026-05-29 14:27:58', '2026-05-29 14:27:58'),
+(6, 2, 16, 'new_user', 'Pendaftar Baru', 'Bella Shafa mendaftar sebagai Pelamar Alumni', '/admin/data-pelamar', 0, '2026-05-29 14:27:58', '2026-05-29 14:27:58'),
+(7, 1, 16, 'tracer_study_submitted', 'Tracer Study Baru', 'Bella Shafa telah mengisi data tracer study', '/admin/data-tracer', 0, '2026-05-29 14:48:54', '2026-05-29 14:48:54'),
+(8, 2, 16, 'tracer_study_submitted', 'Tracer Study Baru', 'Bella Shafa telah mengisi data tracer study', '/admin/data-tracer', 0, '2026-05-29 14:48:54', '2026-05-29 14:48:54');
 
 -- --------------------------------------------------------
 
@@ -73,10 +126,9 @@ CREATE TABLE `tb_admin` (
 --
 
 INSERT INTO `tb_admin` (`id`, `id_user`, `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `telepon`, `alamat`, `foto`, `created_at`, `updated_at`) VALUES
-(1, 1, 'L', 'Jakarta', '2026-04-01', '01234356756', 'Menteng', '1775480118_3b6fe0571e1db9530e05.jpg', '2026-04-03 07:51:09', '2026-04-06 12:55:18'),
-(3, 3, 'P', 'Jakarta', '2000-02-17', '08974567857', '', NULL, '2026-04-03 15:50:14', '2026-04-03 15:50:14'),
-(23, 37, 'L', '', '2000-02-17', '08974567857', 'rusia', '1775482178_d6a6a5b7d04c3894d300.jpg', '2026-04-06 13:29:38', '2026-04-09 13:09:55'),
-(25, 46, 'P', '', '2000-02-17', '08974567857', 'rusia', '1775666044_76540d124c6f19c0c525.jpg', '2026-04-08 16:34:04', '2026-04-09 13:09:34');
+(3, 13, 'L', '', '2000-02-17', '08974567857', '', '1779170396_f4ae73d69ca54d6ebd30.jpg', '2026-05-19 05:49:06', '2026-05-19 05:59:56'),
+(4, 14, 'L', '', '2000-02-17', '08974567857', '', NULL, '2026-05-19 05:49:41', '2026-05-19 05:59:43'),
+(5, 15, 'L', '', '2000-02-17', '08974567857', '', '1779169823_bbaa9b4be741c3428e90.jpg', '2026-05-19 05:50:23', '2026-05-19 05:59:20');
 
 -- --------------------------------------------------------
 
@@ -97,11 +149,11 @@ CREATE TABLE `tb_aktivitas` (
 --
 
 INSERT INTO `tb_aktivitas` (`id`, `nama_aktivitas`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'Bekerja', 1, '2026-04-01 14:21:12', '2026-04-01 14:21:12'),
-(2, 'Kuliah', 1, '2026-04-01 14:21:12', '2026-04-01 14:21:12'),
-(3, 'Wirausaha', 1, '2026-04-01 14:21:12', '2026-04-01 14:21:12'),
-(4, 'Mencari Kerja', 1, '2026-04-01 14:21:12', '2026-04-16 14:57:38'),
-(5, 'Berencana Kuliah', 1, '2026-04-16 14:58:30', '2026-04-16 14:58:30');
+(1, 'Bekerja', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(2, 'Kuliah', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(3, 'Wirausaha', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(4, 'Mencari Kerja', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(5, 'Berencana Kuliah', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24');
 
 -- --------------------------------------------------------
 
@@ -127,8 +179,9 @@ CREATE TABLE `tb_alumni` (
 --
 
 INSERT INTO `tb_alumni` (`id`, `id_pelamar`, `id_angkatan`, `id_jurusan`, `nis`, `nisn`, `no_ijazah`, `is_verifikasi`, `created_at`, `updated_at`) VALUES
-(1, 2, 1, 1, '0986767685', '870878645465', '6645358658778', 0, '2026-04-16 15:41:04', '2026-04-17 17:48:31'),
-(2, 5, 4, 2, '1220087372221', '3231231231231', '11122232122121', 0, '2026-04-21 12:57:20', '2026-04-21 12:57:20');
+(2, 2, 5, 4, '123123123', '123123123', '123123123', 0, '2026-05-15 15:40:52', '2026-05-29 08:09:13'),
+(3, 5, 1, 3, '123123123', '123123123', '123123123', 0, '2026-05-19 03:31:30', '2026-05-19 03:31:30'),
+(4, 6, 1, 2, '123123123', '123123123', '123123123', 0, '2026-05-29 14:27:58', '2026-05-29 14:48:54');
 
 -- --------------------------------------------------------
 
@@ -149,9 +202,11 @@ CREATE TABLE `tb_angkatan` (
 --
 
 INSERT INTO `tb_angkatan` (`id`, `tahun`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, '2022', 1, '2026-04-07 13:56:43', '2026-04-07 13:56:43'),
-(3, '2021', 1, '2026-04-20 12:53:11', '2026-04-20 12:53:11'),
-(4, '2020', 1, '2026-04-20 12:53:20', '2026-04-20 12:53:20');
+(1, '2021', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(2, '2022', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(3, '2023', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(4, '2024', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(5, '2025', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24');
 
 -- --------------------------------------------------------
 
@@ -175,13 +230,8 @@ CREATE TABLE `tb_berkas` (
 --
 
 INSERT INTO `tb_berkas` (`id`, `id_pelamar`, `id_jenis_berkas`, `nama_file`, `path_file`, `status`, `created_at`, `updated_at`) VALUES
-(1, 2, 0, 'Bean.pdf', 'uploads/berkas/1776421732_8b55907daa39dd682919.pdf', '', '2026-04-17 10:28:52', '2026-04-17 10:28:52'),
-(2, 2, 0, 'download.jpeg', 'uploads/berkas/1776421896_5349cf7cc02d9c98429e.jpeg', '', '2026-04-17 10:31:36', '2026-04-17 10:31:36'),
-(3, 2, 0, 'Bukti Ujian 19220744 (803).pdf', 'uploads/berkas/1776447803_189da192bb1db876185f.pdf', '', '2026-04-17 17:41:05', '2026-04-17 17:43:23'),
-(4, 2, 1, 'Bukti Ujian 19220744 (0065).pdf', 'uploads/berkas/1776869797_93971720f528b42fd865.pdf', '', '2026-04-22 14:56:37', '2026-04-22 14:56:37'),
-(5, 2, 3, 'Bukti Ujian 19220744 (221).pdf', 'uploads/berkas/1776929257_ed1f16bf3c3f800abfa0.pdf', '', '2026-04-23 07:27:37', '2026-04-23 07:27:37'),
-(6, 2, 4, 'Bukti Ujian 19220744 (620) (1).pdf', 'uploads/berkas/1776929272_205376a15e19d42dfc97.pdf', '', '2026-04-23 07:27:52', '2026-04-23 07:27:52'),
-(7, 2, 5, 'Bukti Ujian 19220744 (0098).pdf', 'uploads/berkas/1776929282_88d4541c26d9aff8f7e9.pdf', '', '2026-04-23 07:28:02', '2026-04-23 07:28:02');
+(1, 2, 5, 'panduan-skripsi.txt', 'uploads/berkas/1779173526_bce0cc18752b662a7af4.txt', '', '2026-05-19 06:52:06', '2026-05-19 06:52:06'),
+(2, 2, 1, 'CV.pdf', 'uploads/berkas/1779173537_d96b303319d65341ab74.pdf', '', '2026-05-19 06:52:17', '2026-05-19 06:52:17');
 
 -- --------------------------------------------------------
 
@@ -201,13 +251,6 @@ CREATE TABLE `tb_berkas_lamaran` (
   `updated_at` datetime DEFAULT NULL,
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data untuk tabel `tb_berkas_lamaran`
---
-
-INSERT INTO `tb_berkas_lamaran` (`id`, `id_lamaran`, `id_jenis_berkas`, `file_path`, `file_name`, `file_size`, `uploaded_at`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 9, 2, 'uploads/lamaran/1776929306_c6b8a2d27fe2fee8acd9.pdf', 'Bean.pdf', 157560, '2026-04-23 07:28:26', '2026-04-23 07:28:26', '2026-04-23 07:28:26', NULL);
 
 -- --------------------------------------------------------
 
@@ -235,7 +278,7 @@ CREATE TABLE `tb_identitas_sekolah` (
   `tahun_akreditasi` year(4) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Identitas sekolah — hanya 1 baris data';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Identitas sekolah - hanya 1 baris data';
 
 -- --------------------------------------------------------
 
@@ -259,12 +302,12 @@ CREATE TABLE `tb_jenis_berkas` (
 --
 
 INSERT INTO `tb_jenis_berkas` (`id_jenis_berkas`, `nama_berkas`, `slug_berkas`, `berlaku_untuk`, `keterangan`, `status_aktif`, `dibuat_pada`, `diperbarui_pada`) VALUES
-(1, 'CV / Resume', 'cv', 'semua', 'Curriculum vitae atau resume pelamar', 1, '2026-04-22 14:35:13', '2026-04-22 14:35:13'),
-(2, 'Surat Lamaran', 'surat_lamaran', 'semua', 'Surat lamaran kerja berdasarkan lamaran\r\n', 1, '2026-04-22 14:35:13', '2026-04-23 08:22:37'),
-(3, 'Ijazah', 'ijazah', 'semua', 'Ijazah terakhir', 1, '2026-04-22 14:35:13', '2026-04-22 14:35:13'),
-(4, 'KTP', 'ktp', 'semua', 'Kartu Tanda Penduduk', 1, '2026-04-22 14:35:13', '2026-04-22 14:35:13'),
-(5, 'SKCK', 'skck', 'semua', 'Surat Keterangan Catatan Kepolisian', 1, '2026-04-22 14:35:13', '2026-04-22 14:35:13'),
-(6, 'Portofolio', 'porto', 'semua', 'Portofolio Pelamar', 1, '2026-04-23 08:21:59', '2026-04-23 08:26:51');
+(1, 'CV / Resume', 'cv', 'semua', 'Curriculum vitae atau resume pelamar', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(2, 'Surat Lamaran', 'surat_lamaran', 'semua', 'Surat lamaran kerja berdasarkan lowongan', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(3, 'Ijazah', 'ijazah', 'semua', 'Ijazah terakhir', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(4, 'KTP', 'ktp', 'semua', 'Kartu Tanda Penduduk', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(5, 'SKCK', 'skck', 'semua', 'Surat Keterangan Catatan Kepolisian', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(6, 'Portofolio', 'porto', 'semua', 'Portofolio pelamar', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24');
 
 -- --------------------------------------------------------
 
@@ -286,9 +329,11 @@ CREATE TABLE `tb_jurusan` (
 --
 
 INSERT INTO `tb_jurusan` (`id`, `kompetensi_keahlian`, `akronim`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'Teknik Komputer dan Jaringan', 'TKJ', 1, '2026-04-07 14:22:28', '2026-04-07 14:22:28'),
-(2, 'Rekayasa Perangkat Lunak', 'RPL', 1, '2026-04-20 12:53:54', '2026-04-20 12:53:54'),
-(3, 'Teknik Kendaraan Ringan', 'TKR', 1, '2026-04-20 12:54:20', '2026-04-20 12:54:20');
+(1, 'Teknik Komputer dan Jaringan', 'TKJ', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(2, 'Rekayasa Perangkat Lunak', 'RPL', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(3, 'Multimedia', 'MM', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(4, 'Akuntansi dan Keuangan Lembaga', 'AKL', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24'),
+(5, 'Otomatisasi dan Tata Kelola Perkantoran', 'OTKP', 1, '2026-05-14 08:59:24', '2026-05-14 08:59:24');
 
 -- --------------------------------------------------------
 
@@ -303,16 +348,6 @@ CREATE TABLE `tb_kerjasama` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Master jenis kerjasama dengan DUDI';
 
---
--- Dumping data untuk tabel `tb_kerjasama`
---
-
-INSERT INTO `tb_kerjasama` (`id`, `nama_kerjasama`, `created_at`, `updated_at`) VALUES
-(1, 'Praktik Kerja Lapangan (PKL)', '2026-04-01 14:21:13', '2026-04-01 14:21:13'),
-(2, 'Kunjungan Industri', '2026-04-01 14:21:13', '2026-04-01 14:21:13'),
-(3, 'Penguji UKK', '2026-04-01 14:21:13', '2026-04-01 14:21:13'),
-(4, 'Sinkronisasi Kurikulum', '2026-04-01 14:21:13', '2026-04-01 14:21:13');
-
 -- --------------------------------------------------------
 
 --
@@ -325,20 +360,12 @@ CREATE TABLE `tb_lamaran` (
   `id_lowongan` int(10) UNSIGNED NOT NULL,
   `tanggal_melamar` datetime NOT NULL DEFAULT current_timestamp(),
   `tanggal_wawancara` datetime DEFAULT NULL,
-  `status` enum('menunggu_diverifikasi','diproses','lolos_verifikasi','wawancara','tidak_lolos') NOT NULL DEFAULT 'menunggu_diverifikasi',
+  `status` enum('menunggu_diverifikasi','diproses','lolos_verifikasi','wawancara','tidak_lolos','diterima') NOT NULL DEFAULT 'menunggu_diverifikasi',
   `catatan` text DEFAULT NULL,
   `dibuat_oleh` int(10) UNSIGNED DEFAULT NULL COMMENT 'Otomatis dari sesi login',
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Data lamaran kerja pelamar';
-
---
--- Dumping data untuk tabel `tb_lamaran`
---
-
-INSERT INTO `tb_lamaran` (`id`, `id_pelamar`, `id_lowongan`, `tanggal_melamar`, `tanggal_wawancara`, `status`, `catatan`, `dibuat_oleh`, `created_at`, `updated_at`) VALUES
-(8, 2, 1, '2026-04-19 00:00:00', NULL, 'diproses', '', 1, '2026-04-19 13:44:11', '2026-04-19 14:24:30'),
-(9, 2, 2, '2026-04-23 00:00:00', NULL, 'menunggu_diverifikasi', NULL, NULL, '2026-04-23 07:28:26', '2026-04-23 07:28:26');
 
 -- --------------------------------------------------------
 
@@ -349,8 +376,8 @@ INSERT INTO `tb_lamaran` (`id`, `id_pelamar`, `id_lowongan`, `tanggal_melamar`, 
 CREATE TABLE `tb_lamaran_status` (
   `id` int(10) UNSIGNED NOT NULL,
   `id_lamaran` int(10) UNSIGNED NOT NULL,
-  `status_lama` enum('menunggu_diverifikasi','diproses','lolos_verifikasi','wawancara','tidak_lolos') DEFAULT NULL,
-  `status_baru` enum('menunggu_diverifikasi','diproses','lolos_verifikasi','wawancara','tidak_lolos') NOT NULL,
+  `status_lama` enum('menunggu_diverifikasi','diproses','lolos_verifikasi','wawancara','tidak_lolos','diterima') DEFAULT NULL,
+  `status_baru` enum('menunggu_diverifikasi','diproses','lolos_verifikasi','wawancara','tidak_lolos','diterima') NOT NULL,
   `catatan` text DEFAULT NULL,
   `diubah_oleh` int(10) UNSIGNED DEFAULT NULL COMMENT 'Otomatis dari sesi login',
   `created_at` datetime DEFAULT current_timestamp()
@@ -366,6 +393,7 @@ CREATE TABLE `tb_lowongan` (
   `id` int(10) UNSIGNED NOT NULL,
   `id_perusahaan` int(10) UNSIGNED NOT NULL,
   `posisi` varchar(100) NOT NULL COMMENT 'Nama jabatan: Staff IT, HRD, dll',
+  `gaji` varchar(100) NOT NULL,
   `deskripsi_pekerjaan` text DEFAULT NULL,
   `kualifikasi` text DEFAULT NULL,
   `jenis_pekerjaan` enum('fulltime','parttime','magang','kontrak') NOT NULL,
@@ -381,10 +409,9 @@ CREATE TABLE `tb_lowongan` (
 -- Dumping data untuk tabel `tb_lowongan`
 --
 
-INSERT INTO `tb_lowongan` (`id`, `id_perusahaan`, `posisi`, `deskripsi_pekerjaan`, `kualifikasi`, `jenis_pekerjaan`, `lokasi_kerja`, `batas_lamaran`, `status`, `dibuat_oleh`, `created_at`, `updated_at`) VALUES
-(1, 1, 'finance', 'xxxxxxxxx', 'xxxxxxxxxx', 'fulltime', 'Jakarta Selatan', '2026-04-22', 'aktif', NULL, '2026-04-10 22:58:55', '2026-04-10 23:16:08'),
-(2, 2, 'IT Support', 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'kontrak', 'Jakarta Timur', '2026-04-30', 'aktif', 1, '2026-04-19 21:39:45', '2026-04-19 21:39:45'),
-(4, 1, 'AI Engineer', 'xxxxxxxxxxxxxxxxxx', 'xxxxxxxxxxxxxxx', 'fulltime', 'Jakarta Timur', '2026-05-09', 'draft', 1, '2026-04-22 21:46:50', '2026-04-22 21:46:50');
+INSERT INTO `tb_lowongan` (`id`, `id_perusahaan`, `posisi`, `gaji`, `deskripsi_pekerjaan`, `kualifikasi`, `jenis_pekerjaan`, `lokasi_kerja`, `batas_lamaran`, `status`, `dibuat_oleh`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Staff IT Support', 'Rp 15.000.000', 'Lorem Ipsum originated from a classical Latin text, De finibus bonorum et malorum by Cicero, written in 45 BC. The first line, \"Lorem ipsum dolor sit amet,\" is derived from section 1.10.32 of this work. It became widely used in the printing industry in the 1500s when an unknown printer scrambled type to create a specimen book, and it has survived through centuries into modern digital typesetting \r\nLorem Ipsum\r\nLorem Ipsum\r\n+1\r\n. Its popularity surged in the 1960s with Letraset sheets and later with desktop publishing software like Aldus PageMaker \r\n', 'Lorem Ipsum originated from a classical Latin text, De finibus bonorum et malorum by Cicero, written in 45 BC. The first line, \"Lorem ipsum dolor sit amet,\" is derived from section 1.10.32 of this work. It became widely used in the printing industry in the 1500s when an unknown printer scrambled type to create a specimen book, and it has survived through centuries into modern digital typesetting \r\nLorem Ipsum\r\nLorem Ipsum\r\n+1\r\n. Its popularity surged in the 1960s with Letraset sheets and later with desktop publishing software like Aldus PageMaker \r\n', 'fulltime', 'Jakarta Selatan', '2026-06-30', 'aktif', 2, '2026-05-19 12:54:08', '2026-05-19 12:54:08'),
+(2, 1, 'Cleaning Service', 'Rp 6.000.000', 'Lorem Ipsum originated from a classical Latin text, De finibus bonorum et malorum by Cicero, written in 45 BC. The first line, \"Lorem ipsum dolor sit amet,\" is derived from section 1.10.32 of this work. It became widely used in the printing industry in the 1500s when an unknown printer scrambled type to create a specimen book, and it has survived through centuries into modern digital typesetting \r\nLorem Ipsum\r\nLorem Ipsum\r\n+1\r\n. Its popularity surged in the 1960s with Letraset sheets and later with desktop publishing software like Aldus PageMaker \r\n', 'Lorem Ipsum originated from a classical Latin text, De finibus bonorum et malorum by Cicero, written in 45 BC. The first line, \"Lorem ipsum dolor sit amet,\" is derived from section 1.10.32 of this work. It became widely used in the printing industry in the 1500s when an unknown printer scrambled type to create a specimen book, and it has survived through centuries into modern digital typesetting \r\nLorem Ipsum\r\nLorem Ipsum\r\n+1\r\n. Its popularity surged in the 1960s with Letraset sheets and later with desktop publishing software like Aldus PageMaker \r\n', 'parttime', 'Jakarta Timur', '2026-06-30', 'aktif', 13, '2026-05-19 13:02:10', '2026-05-19 13:02:10');
 
 -- --------------------------------------------------------
 
@@ -404,13 +431,10 @@ CREATE TABLE `tb_lowongan_jurusan` (
 --
 
 INSERT INTO `tb_lowongan_jurusan` (`id`, `id_lowongan`, `id_jurusan`, `created_at`) VALUES
-(2, 1, 1, '2026-04-10 23:16:08'),
-(10, 4, 1, '2026-04-22 21:46:50'),
-(11, 4, 2, '2026-04-22 21:46:50'),
-(12, 4, 3, '2026-04-22 21:46:50'),
-(13, 2, 1, '2026-04-22 21:47:28'),
-(14, 2, 2, '2026-04-22 21:47:28'),
-(15, 2, 3, '2026-04-22 21:47:28');
+(2, 1, 1, '2026-05-19 12:54:29'),
+(3, 2, 1, '2026-05-19 13:02:10'),
+(4, 2, 2, '2026-05-19 13:02:10'),
+(5, 2, 3, '2026-05-19 13:02:10');
 
 -- --------------------------------------------------------
 
@@ -432,16 +456,6 @@ CREATE TABLE `tb_mou` (
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='MOU/perjanjian kerjasama sekolah dengan DUDI';
-
---
--- Dumping data untuk tabel `tb_mou`
---
-
-INSERT INTO `tb_mou` (`id`, `id_perusahaan`, `id_kerjasama`, `nomor_mou`, `tanggal_mou`, `tanggal_berlaku`, `tanggal_berakhir`, `file_mou`, `status`, `created_by`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, NULL, NULL, NULL, NULL, NULL, 'aktif', NULL, '2026-04-09 22:11:57', '2026-04-09 22:11:57'),
-(2, 1, 4, NULL, NULL, NULL, NULL, NULL, 'aktif', NULL, '2026-04-09 22:11:57', '2026-04-09 22:11:57'),
-(3, 2, 1, NULL, NULL, NULL, NULL, NULL, 'aktif', NULL, '2026-04-10 20:42:23', '2026-04-10 20:42:23'),
-(4, 2, 2, NULL, NULL, NULL, NULL, NULL, 'aktif', NULL, '2026-04-10 20:42:23', '2026-04-10 20:42:23');
 
 -- --------------------------------------------------------
 
@@ -474,10 +488,10 @@ CREATE TABLE `tb_pelamar` (
 --
 
 INSERT INTO `tb_pelamar` (`id`, `id_user`, `account_id`, `jenis_pelamar`, `telepon`, `foto`, `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `alamat`, `nomer_nik`, `status_pendaftaran`, `terdaftar_pada`, `diaktivasi_oleh`, `diaktivasi_pada`, `created_at`, `updated_at`) VALUES
-(2, 43, 'plm-001', 'alumni', '082121521388', '1776448007_9e00a40b87dda6df537d.jpg', 'L', 'Jakarta', '2026-04-18', 'babaksari', '12343121231', 'terdaftar', '2026-04-22 12:41:02', NULL, NULL, '2026-04-07 12:59:39', '2026-04-22 12:41:02'),
-(4, 45, 'plm-002', 'umum', '08131313', '1775566983_051190a4d9f4c0e3c18b.jpg', 'L', 'Jakarta', '2026-04-09', 'bintara', '329081723123', 'terdaftar', '2026-04-22 12:41:10', NULL, NULL, '2026-04-07 13:03:03', '2026-04-22 12:41:10'),
-(5, 47, 'plm-003', 'alumni', '089821982312', '1776776123_a02e4d7e7fbe42c54d72.png', 'L', 'Brebes', '2026-04-01', 'Tambun Selatan', '312312313423221', 'menunggu_aktivasi', NULL, NULL, NULL, '2026-04-21 12:44:55', '2026-04-21 12:55:23'),
-(12, 54, 'plm-004', 'umum', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'menunggu_aktivasi', NULL, NULL, NULL, '2026-04-23 08:49:12', '2026-04-23 08:49:12');
+(2, 9, 'plm-001', 'alumni', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'aktif', '2026-05-19 06:50:52', 2, '2026-05-19 06:50:52', '2026-05-15 15:40:52', '2026-05-19 06:50:52'),
+(4, 11, 'plm-002', 'umum', '', NULL, '', '', '0000-00-00', '', '', 'aktif', '2026-05-29 14:39:25', 2, '2026-05-29 14:39:25', '2026-05-15 18:00:07', '2026-05-29 14:39:25'),
+(5, 12, 'plm-003', 'alumni', '', NULL, '', '', '0000-00-00', '', '', 'menunggu_aktivasi', NULL, NULL, NULL, '2026-05-19 03:31:30', '2026-05-19 03:46:32'),
+(6, 16, 'plm-004', 'alumni', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'menunggu_aktivasi', NULL, NULL, NULL, '2026-05-29 14:27:58', '2026-05-29 14:39:42');
 
 -- --------------------------------------------------------
 
@@ -506,8 +520,16 @@ CREATE TABLE `tb_perusahaan` (
 --
 
 INSERT INTO `tb_perusahaan` (`id`, `id_user`, `nama_perusahaan`, `bidang_usaha`, `alamat`, `kota`, `no_telepon`, `email`, `website`, `logo`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 46, 'PT. Bank Rakyat Indonesia', 'Bank', 'Jalan Kembang Sepatu Raya No. 10 Jakarta', 'Jakarta', '08974567857', 'bri1@gmail.com', 'www.bri.com', '1775664239_e9fca902d353c37bec61.jpg', 1, '2026-04-08 16:03:59', '2026-04-09 15:11:57'),
-(2, 37, 'CV.skynet', 'Internet', 'Tambun', 'Bekasi', '021-6784728', 'skynet21@wifi.com', 'www.skynet.com', '1775708311_02cae5e97d2e0b0c740d.jpg', 1, '2026-04-09 04:18:31', '2026-04-10 13:42:23');
+(1, 13, 'PT Maju Bersama Teknologi', 'Teknologi Informasi', 'Jl. Sudirman No. 12, Kel. Pinangsia', 'Jakarta', '02112345678', 'info@majubersama.co.id', 'https://www.majubersama.co.id', NULL, 1, '2026-05-19 05:46:48', '2026-05-19 05:59:56'),
+(2, 15, 'CV Karya Mandiri Nusantara', 'Konstruksi & Bangunan', 'Jl. Ahmad Yani No. 45, Kel. Merdeka', 'Bandung', '02287654321', 'cs@karyamandiri.id', 'https://www.karyamandiri.id', NULL, 1, '2026-05-19 05:46:48', '2026-05-19 05:59:20'),
+(3, 14, 'PT Sejahtera Abadi Grup', 'Perdagangan & Distribusi', 'Jl. Diponegoro No. 8, Kel. Tegalsari', 'Surabaya', '03198765432', 'contact@sejahteraabadi.com', 'https://www.sejahteraabadi.com', NULL, 1, '2026-05-19 05:46:48', '2026-05-19 05:59:43'),
+(4, NULL, 'PT Global Solusi Digital', 'Teknologi Informasi', 'Jl. Gatot Subroto Kav. 22', 'Semarang', '02411122334', 'hello@globalsolusi.tech', 'https://www.globalsolusi.tech', NULL, 1, '2026-05-19 05:46:48', '2026-05-19 05:46:48'),
+(5, NULL, 'CV Mitra Usaha Bersama', 'Kuliner & F&B', 'Jl. Malioboro No. 77', 'Yogyakarta', '02744556677', 'mub@mitrausaha.id', 'https://www.mitrausaha.id', NULL, 1, '2026-05-19 05:46:48', '2026-05-19 05:46:48'),
+(6, NULL, 'PT Nusantara Energi Prima', 'Energi & Pertambangan', 'Jl. S. Parman No. 100, Kel. Palmerah', 'Jakarta', '02133445566', 'info@nusantaraenergi.co.id', 'https://www.nusantaraenergi.co.id', NULL, 1, '2026-05-19 05:46:48', '2026-05-19 05:46:48'),
+(7, NULL, 'PT Cipta Kreasi Media', 'Media & Periklanan', 'Jl. Raya Darmo No. 56', 'Surabaya', '03177889900', 'halo@ciptakreasi.com', 'https://www.ciptakreasi.com', NULL, 1, '2026-05-19 05:46:48', '2026-05-19 05:46:48'),
+(8, NULL, 'CV Harapan Jaya Logistik', 'Logistik & Ekspedisi', 'Jl. Imam Bonjol No. 33', 'Medan', '06188990011', 'ops@harapanjaya.id', 'https://www.harapanjaya.id', NULL, 1, '2026-05-19 05:46:48', '2026-05-19 05:46:48'),
+(9, NULL, 'PT Artha Kencana Finance', 'Keuangan & Perbankan', 'Jl. Asia Afrika No. 15', 'Bandung', '02255667788', 'info@arthakencana.co.id', 'https://www.arthakencana.co.id', NULL, 1, '2026-05-19 05:46:48', '2026-05-19 05:46:48'),
+(10, NULL, 'PT Bumi Hijau Agrikultur', 'Pertanian & Agribisnis', 'Jl. Pahlawan No. 9, Kel. Klojen', 'Malang', '03411223344', 'admin@bumihijau.co.id', 'https://www.bumihijau.co.id', NULL, 1, '2026-05-19 05:46:48', '2026-05-19 05:46:48');
 
 -- --------------------------------------------------------
 
@@ -546,11 +568,11 @@ CREATE TABLE `tb_roles` (
 --
 
 INSERT INTO `tb_roles` (`id`, `nama_role`, `created_at`, `updated_at`) VALUES
-(1, 'Super Admin', '2026-04-01 14:21:12', '2026-04-01 14:21:12'),
-(2, 'Admin BKK', '2026-04-01 14:21:12', '2026-04-01 14:21:12'),
-(3, 'Admin DUDI', '2026-04-01 14:21:12', '2026-04-01 14:21:12'),
-(4, 'Pelamar Alumni', '2026-04-01 14:21:12', '2026-04-01 14:21:12'),
-(5, 'Pelamar Umum', '2026-04-01 14:21:12', '2026-04-01 14:21:12');
+(1, 'Super Admin', '2026-05-14 08:59:23', '2026-05-14 08:59:23'),
+(2, 'Admin BKK', '2026-05-14 08:59:23', '2026-05-14 08:59:23'),
+(3, 'Admin DUDI', '2026-05-14 08:59:23', '2026-05-14 08:59:23'),
+(4, 'Pelamar Alumni', '2026-05-14 08:59:23', '2026-05-14 08:59:23'),
+(5, 'Pelamar Umum', '2026-05-14 08:59:23', '2026-05-14 08:59:23');
 
 -- --------------------------------------------------------
 
@@ -570,14 +592,9 @@ CREATE TABLE `tb_syarat_berkas` (
 --
 
 INSERT INTO `tb_syarat_berkas` (`id`, `id_lowongan`, `id_jenis_berkas`, `wajib`) VALUES
-(1, 4, 1, 1),
-(2, 4, 5, 1),
-(3, 4, 2, 1),
+(3, 1, 1, 1),
 (4, 2, 1, 1),
-(5, 2, 3, 1),
-(6, 2, 4, 1),
-(7, 2, 5, 1),
-(8, 2, 2, 1);
+(5, 2, 5, 1);
 
 -- --------------------------------------------------------
 
@@ -619,8 +636,9 @@ CREATE TABLE `tb_tracer_alumni` (
 --
 
 INSERT INTO `tb_tracer_alumni` (`id`, `id_alumni`, `id_aktivitas`, `status`, `diverifikasi_oleh`, `diverifikasi_at`, `disetujui_oleh`, `disetujui_at`, `posisi_kerja`, `nama_dudi`, `bidang_dudi`, `alamat_dudi`, `tahun_mulai_kerja`, `is_relevan_jurusan`, `penghasilan_range`, `universitas`, `program_studi`, `status_kuliah`, `nama_usaha`, `bidang_usaha`, `modal_awal`, `penghasilan_usaha`, `rencana_universitas`, `rencana_prodi`, `created_at`, `updated_at`) VALUES
-(1, 1, 2, 'disetujui', 1, '2026-04-20 12:51:52', 1, '2026-04-21 14:16:20', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'BSI', 'SI', 'semester 8', NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-16 15:41:04', '2026-04-21 14:16:20'),
-(2, 2, 1, 'terkirim', NULL, NULL, NULL, NULL, 'Production staff', 'Inaco', 'Ager ager', 'tambun', '2021', 0, 'Rp 50.000.000', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-21 12:57:20', '2026-04-21 12:57:20');
+(2, 2, 1, 'disetujui', NULL, NULL, 2, '2026-05-29 08:11:15', 'Production', 'PT. NIRAMAS STUDIO', 'Produksi Jelly', 'Tambun', '2021', 0, 'Rp 5.000.000', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-05-15 15:40:52', '2026-05-29 08:11:15'),
+(3, 3, NULL, 'draft', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-05-19 03:31:30', '2026-05-19 03:31:30'),
+(5, 4, 1, 'terkirim', NULL, NULL, NULL, NULL, '', '', '', '', '0000', 0, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-05-29 14:48:54', '2026-05-29 14:48:54');
 
 -- --------------------------------------------------------
 
@@ -635,6 +653,11 @@ CREATE TABLE `tb_users` (
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `remember_token` varchar(100) DEFAULT NULL,
+  `reset_token` varchar(64) DEFAULT NULL,
+  `reset_expires` datetime DEFAULT NULL,
+  `email_token` varchar(64) DEFAULT NULL,
+  `email_verified_at` datetime DEFAULT NULL,
+  `is_verified` tinyint(1) DEFAULT 0,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `last_login` datetime DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
@@ -645,15 +668,16 @@ CREATE TABLE `tb_users` (
 -- Dumping data untuk tabel `tb_users`
 --
 
-INSERT INTO `tb_users` (`id`, `id_role`, `nama`, `email`, `password`, `remember_token`, `is_active`, `last_login`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Super Admin', 'admin@gmail.com', '$2y$10$QuQuAqoM8rvKN22HeiJ3meJ.HptsN6emVA5e368mfiXT1xnxcXRkG', NULL, 1, '2026-04-23 07:36:36', '2026-04-02 13:21:50', '2026-04-23 07:36:36'),
-(3, 2, 'Admin BKK', 'admin@bkk.test', '$2y$10$8m8pns8/46mGFhl9eyaDeOfzYydqmhbBqXPGxnDSYy7Xe04Efbwja', NULL, 1, '2026-04-13 10:25:55', '2026-04-03 15:50:13', '2026-04-13 10:25:55'),
-(37, 3, 'Admin DUDI', 'DUDI@gmail.com', '$2y$10$r0Py6UQ5jtw7tBZLzKRX2OR6yU4UWEUVtqXEKZVerSJnbxKRlirU2', NULL, 1, NULL, '2026-04-06 13:29:37', '2026-04-09 13:09:55'),
-(43, 4, 'Chandra', 'chandra@gmail.com', '$2y$10$pIb1Ku3btu5Kfw1cPArZU.bPt3MpZXQ7C/LzJUns9JpaY0CQtiiIS', NULL, 1, '2026-04-23 07:26:44', '2026-04-07 12:59:38', '2026-04-23 07:26:44'),
-(45, 5, 'fadhil', 'fadhil@gmail.com', '$2y$10$H0uI2uGh/MvD53lUnogCjuyMs4WI6k6FQmWrAp5a1DgZNmF7Y4ABq', NULL, 1, '2026-04-17 10:43:31', '2026-04-07 13:03:03', '2026-04-17 10:43:31'),
-(46, 3, 'andika', 'andika@gmail.com', '$2y$10$WZQlSwC6FZESYgYdOTskZ.psL/sSulL29Jf1xvtLAqCRGODIVWPIq', NULL, 1, NULL, '2026-04-08 16:34:04', '2026-04-09 13:09:34'),
-(47, 4, 'aji sodikin', 'aji@gmail.com', '$2y$10$dfA1zJpJSPXn.ny2ywzdpO/SZFiop2ABrW9Zcq3ZDIKQRI94jKg1a', NULL, 1, '2026-04-21 12:48:26', '2026-04-21 12:44:55', '2026-04-21 12:55:23'),
-(54, 5, 'rifki', 'rifki@gmail.com', '$2y$10$ybnWfVGnZBBYOuxLK606T.8M6OqlRSK8.SpENkHT4dtQFWj32EkkG', NULL, 1, '2026-04-23 08:49:26', '2026-04-23 08:49:12', '2026-04-23 08:49:26');
+INSERT INTO `tb_users` (`id`, `id_role`, `nama`, `email`, `password`, `remember_token`, `reset_token`, `reset_expires`, `email_token`, `email_verified_at`, `is_verified`, `is_active`, `last_login`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Super Admin', 'admin@gmail.com', '$2y$10$jZ2wv2wYzvbUjhe7EueJUuswqxBtYKyQesOYQXaIvGjgp0csjzhE.', NULL, NULL, NULL, NULL, '2026-05-15 17:17:44', 1, 1, '2026-05-15 15:37:06', '2026-05-14 08:59:23', '2026-05-16 00:17:44'),
+(2, 2, 'Admin BKK', 'admin@bkk.test', '$2y$10$8DV2jmaey/cFjenfuUEmZ.74iRVhlg2/0J1n8MF3GLrJ0hRa17cea', NULL, NULL, NULL, NULL, '2026-05-15 17:17:44', 1, 1, '2026-05-29 14:24:56', '2026-05-14 08:59:23', '2026-05-29 14:24:56'),
+(9, 4, 'Afillah AJie Pratama', 'afilahpratama@gmail.com', '$2y$10$8b8EAIKlCqqPmR6sSiuRVu/.c/9ueLVo46XmHZTv/.1FfJ4cqobMG', NULL, 'c850c0cadd2a2730ae175c8f19dbb9f4bba6da7ff52b7196ff1ce207b33fb825', '2026-05-15 16:41:06', NULL, '2026-05-15 17:17:44', 1, 1, '2026-05-29 08:03:42', '2026-05-15 15:40:52', '2026-05-29 08:03:42'),
+(11, 5, 'Muhammad Fadhil Hilmi', 'muhammadfadhilhilmi3@gmail.com', '$2y$10$HpRuCHpHi6RMD2xnkJX1ouhwrmJO4/Wygo75pUQZd9yB5ZxDE6bk.', NULL, NULL, NULL, NULL, '2026-05-29 14:39:25', 1, 1, NULL, '2026-05-15 18:00:07', '2026-05-29 14:39:25'),
+(12, 4, 'Eri Chandra Apriyadi', '19220636@bsi.ac.id', '$2y$10$9rgA4DyYDXUHtP8TrTDk4u.1Innl.ZfHB7SrOO.7KkLzReljbhjwS', NULL, NULL, NULL, NULL, '2026-05-19 03:46:32', 1, 1, NULL, '2026-05-19 03:31:30', '2026-05-19 03:46:32'),
+(13, 3, 'Admin DUDI', 'DUDI@gmail.com', '$2y$10$Ker5tXI6B5kd22rx3ncwtO28uTlAoqk9uqTtDAP.q38vnjSo6RIFS', NULL, NULL, NULL, NULL, '2026-05-19 05:59:56', 1, 1, '2026-05-19 06:01:09', '2026-05-19 05:49:06', '2026-05-19 06:01:09'),
+(14, 3, 'Admin DUDI 2', 'DUDI2@gmail.com', '$2y$10$HI6hJ4Yg15d/Y4KCsyXfyOrmwf26Pg.GeoFrSMYNywlRm0DyhjHZW', NULL, NULL, NULL, NULL, '2026-05-19 05:59:43', 1, 1, NULL, '2026-05-19 05:49:41', '2026-05-19 05:59:43'),
+(15, 3, 'Admin DUDI 3', 'DUDI3@gmail.com', '$2y$10$4pjoWm.pcZ52.//epfer.e/LnY4YE9JPoAoo9DhesHfPl6rpVg7vK', NULL, NULL, NULL, NULL, '2026-05-19 05:59:20', 1, 1, NULL, '2026-05-19 05:50:23', '2026-05-19 05:59:20'),
+(16, 4, 'Bella Shafa', 'bellashafazaya@gmail.com', '$2y$10$97FmXF4UpOZPrUkYgvQd..PGntGMtVu4Homwi1Mbwar9MY1GqMBfC', NULL, NULL, NULL, NULL, '2026-05-29 14:39:42', 1, 1, '2026-05-29 14:45:23', '2026-05-29 14:27:58', '2026-05-29 14:45:23');
 
 --
 -- Indexes for dumped tables
@@ -664,6 +688,15 @@ INSERT INTO `tb_users` (`id`, `id_role`, `nama`, `email`, `password`, `remember_
 --
 ALTER TABLE `migrations`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indeks untuk tabel `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `notifications_sender_id_foreign` (`sender_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `is_read` (`is_read`);
 
 --
 -- Indeks untuk tabel `tb_admin`
@@ -698,7 +731,8 @@ ALTER TABLE `tb_angkatan`
 --
 ALTER TABLE `tb_berkas`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `id_pelamar` (`id_pelamar`);
+  ADD KEY `id_pelamar` (`id_pelamar`),
+  ADD KEY `id_jenis_berkas` (`id_jenis_berkas`);
 
 --
 -- Indeks untuk tabel `tb_berkas_lamaran`
@@ -837,13 +871,19 @@ ALTER TABLE `tb_users`
 -- AUTO_INCREMENT untuk tabel `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+
+--
+-- AUTO_INCREMENT untuk tabel `notifications`
+--
+ALTER TABLE `notifications`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_admin`
 --
 ALTER TABLE `tb_admin`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_aktivitas`
@@ -855,25 +895,25 @@ ALTER TABLE `tb_aktivitas`
 -- AUTO_INCREMENT untuk tabel `tb_alumni`
 --
 ALTER TABLE `tb_alumni`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_angkatan`
 --
 ALTER TABLE `tb_angkatan`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_berkas`
 --
 ALTER TABLE `tb_berkas`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_berkas_lamaran`
 --
 ALTER TABLE `tb_berkas_lamaran`
-  MODIFY `id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_identitas_sekolah`
@@ -891,19 +931,19 @@ ALTER TABLE `tb_jenis_berkas`
 -- AUTO_INCREMENT untuk tabel `tb_jurusan`
 --
 ALTER TABLE `tb_jurusan`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_kerjasama`
 --
 ALTER TABLE `tb_kerjasama`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_lamaran`
 --
 ALTER TABLE `tb_lamaran`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_lamaran_status`
@@ -915,31 +955,31 @@ ALTER TABLE `tb_lamaran_status`
 -- AUTO_INCREMENT untuk tabel `tb_lowongan`
 --
 ALTER TABLE `tb_lowongan`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_lowongan_jurusan`
 --
 ALTER TABLE `tb_lowongan_jurusan`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_mou`
 --
 ALTER TABLE `tb_mou`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_pelamar`
 --
 ALTER TABLE `tb_pelamar`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_perusahaan`
 --
 ALTER TABLE `tb_perusahaan`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_riwayat_kerja`
@@ -957,23 +997,30 @@ ALTER TABLE `tb_roles`
 -- AUTO_INCREMENT untuk tabel `tb_syarat_berkas`
 --
 ALTER TABLE `tb_syarat_berkas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_tracer_alumni`
 --
 ALTER TABLE `tb_tracer_alumni`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT untuk tabel `tb_users`
 --
 ALTER TABLE `tb_users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
 --
+
+--
+-- Ketidakleluasaan untuk tabel `notifications`
+--
+ALTER TABLE `notifications`
+  ADD CONSTRAINT `notifications_sender_id_foreign` FOREIGN KEY (`sender_id`) REFERENCES `tb_users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `notifications_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `tb_users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `tb_admin`
@@ -993,7 +1040,8 @@ ALTER TABLE `tb_alumni`
 -- Ketidakleluasaan untuk tabel `tb_berkas`
 --
 ALTER TABLE `tb_berkas`
-  ADD CONSTRAINT `tb_berkas_ibfk_1` FOREIGN KEY (`id_pelamar`) REFERENCES `tb_pelamar` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `tb_berkas_ibfk_1` FOREIGN KEY (`id_pelamar`) REFERENCES `tb_pelamar` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `tb_berkas_ibfk_2` FOREIGN KEY (`id_jenis_berkas`) REFERENCES `tb_jenis_berkas` (`id_jenis_berkas`) ON UPDATE CASCADE;
 
 --
 -- Ketidakleluasaan untuk tabel `tb_berkas_lamaran`

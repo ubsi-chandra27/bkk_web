@@ -26,7 +26,6 @@ class HomeController extends BaseController
 
     public function __construct()
     {
-        helper('landing'); // load app/Helpers/landing_helper.php
         $this->lowonganModel   = new LowonganModel();
         $this->perusahaanModel = new PerusahaanModel();
         $this->userModel      = new UserModel();
@@ -39,10 +38,29 @@ class HomeController extends BaseController
     }
 
     // ---------------------------------------------------------------
-    // Beranda / Landing Page
+    // Beranda / Landing Page      
     // ---------------------------------------------------------------
     public function index()
     {
+        $session = session();
+        $userId = $session->get('user_id') ?? $session->get('id_user') ?? $session->get('id');
+        $roleId = $session->get('role_id') ?? $session->get('id_role');
+        $tracerKosong = false;
+
+        if ($session->get('isLoggedIn') && (int) $roleId === 4 && !empty($userId)) {
+            $tracer = \Config\Database::connect()
+                ->table('tb_tracer_alumni')
+                ->select('tb_tracer_alumni.id_aktivitas')
+                ->join('tb_alumni', 'tb_alumni.id = tb_tracer_alumni.id_alumni', 'left')
+                ->join('tb_pelamar', 'tb_pelamar.id = tb_alumni.id_pelamar', 'left')
+                ->where('tb_pelamar.id_user', $userId)
+                ->get()
+                ->getRowArray();
+
+            $idAktivitas = $tracer['id_aktivitas'] ?? null;
+            $tracerKosong = !$tracer || $idAktivitas === null || trim((string) $idAktivitas) === '';
+        }
+
         // Ambil semua lowongan aktif beserta nama perusahaan (pakai method yang sudah ada)
         $semuaLowongan = $this->lowonganModel->getLowongan();
 
@@ -70,6 +88,7 @@ class HomeController extends BaseController
             'totalPerusahaan' => count($perusahaans),
             'totalPelamar' => $totalPelamar,
             'totalAlumni' => $totalAlumni,
+            'tracerKosong' => $tracerKosong,
         ];
 
         return view('landing/index', $data);
@@ -80,9 +99,21 @@ class HomeController extends BaseController
     // ---------------------------------------------------------------
     public function lowongan()
     {
+        $allowedGajiFilters = ['lt5', '5to10', '10to15', 'gt15'];
+        $gaji = (string) $this->request->getGet('gaji');
+        $filters = [
+            'posisi' => trim((string) $this->request->getGet('posisi')),
+            'gaji'   => in_array($gaji, $allowedGajiFilters, true) ? $gaji : '',
+            'jurusan' => trim((string) $this->request->getGet('jurusan')),
+            'lokasi' => trim((string) $this->request->getGet('lokasi')),
+        ];
+
         $data = [
-            'title'     => 'Lowongan Kerja',
-            'lowongans' => $this->lowonganModel->getLowonganAktif(),
+            'title'       => 'Lowongan Kerja',
+            'lowongans'   => $this->lowonganModel->getLowonganAktif(0, $filters),
+            'filters'     => $filters,
+            'jurusanList' => $this->lowonganModel->getJurusanLowonganAktif(),
+            'lokasiList'  => $this->lowonganModel->getLokasiLowonganAktif(),
         ];
 
         return view('landing/lowongan/index', $data);
@@ -103,10 +134,12 @@ class HomeController extends BaseController
         $sudahLamar = false;
         $berkasKurang = [];
         $berkasLamaran = [];
+        $statusPendaftaran = null;
         if (session()->get('isLoggedIn') && in_array(session()->get('id_role'), [4, 5])) {
             $userId = session()->get('id');
             $pelamar = $this->pelamarModel->where('id_user', $userId)->first();
             if ($pelamar) {
+                $statusPendaftaran = strtolower((string) ($pelamar['status_pendaftaran'] ?? 'menunggu_aktivasi'));
                 $existingLamaran = $this->lamaranModel->where('id_pelamar', $pelamar['id'])->where('id_lowongan', $id)->first();
                 $sudahLamar = $existingLamaran ? true : false;
                 if ($existingLamaran) {
@@ -141,6 +174,7 @@ class HomeController extends BaseController
             'sudahLamar' => $sudahLamar,
             'berkasKurang' => $berkasKurang,
             'berkasLamaran' => $berkasLamaran,
+            'statusPendaftaran' => $statusPendaftaran,
         ];
 
         return view('landing/lowongan/detail', $data);
@@ -178,6 +212,10 @@ class HomeController extends BaseController
         $pelamar = $this->pelamarModel->where('id_user', $userId)->first();
         if (!$pelamar) {
             return redirect()->to('/profil')->with('error', 'Lengkapi data profil pelamar terlebih dahulu.');
+        }
+
+        if (strtolower((string) ($pelamar['status_pendaftaran'] ?? 'menunggu_aktivasi')) === 'menunggu_aktivasi') {
+            return redirect()->to('/lowongan/' . $id_lowongan)->with('error', 'Akun Anda masih menunggu aktivasi admin. Anda belum bisa melamar lowongan.');
         }
 
         // Cek apakah sudah pernah melamar lowongan ini
@@ -283,6 +321,17 @@ class HomeController extends BaseController
             }
 
             $db->transCommit();
+
+            // Kirim notifikasi ke admin
+            $notif = new \App\Libraries\NotificationService();
+            $savedLamaran = array_merge($dataLamaran, ['id' => $idLamaran]);
+
+            // Ambil data user pelamar untuk nama
+            $pelamarUser = $this->userModel->find($pelamar['id_user']);
+            $pelamarData = array_merge($pelamar, $pelamarUser ?? []);
+
+            $notif->notifyAdminsNewApplication($savedLamaran, $pelamarData);
+
             return redirect()->to('/lowongan/' . $id_lowongan)->with('success', 'Lamaran Anda berhasil dikirim.');
         } catch (\Throwable $e) {
             $db->transRollback();

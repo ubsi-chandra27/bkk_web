@@ -22,7 +22,7 @@ class AuthFilter implements FilterInterface
                 // Redirect ke halaman sesuai role masing-masing
                 return match ($userRole) {
                     1, 2 => redirect()->to('/dashboard'),
-                    3 => redirect()->to('/'),
+                    3 => redirect()->to('/dashboard'),
                     4, 5    => redirect()->to('/'),
                     default => redirect()->to('/'),
                 };

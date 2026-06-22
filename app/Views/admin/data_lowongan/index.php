@@ -1,6 +1,27 @@
 <?= $this->extend('admin/layout/app') ?>
 <?= $this->section('content') ?>
 <div id="kt_content_container" class="container-xxl">
+    <div class="card card-flush mb-4">
+        <div class="card-body py-4">
+            <form method="GET" action="<?= site_url('admin/data-lowongan') ?>">
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-semibold">Nama Perusahaan</label>
+                        <input type="text" name="perusahaan" class="form-control form-control-solid" placeholder="Cari nama perusahaan" value="<?= esc($filters['perusahaan'] ?? '') ?>">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label fw-semibold">Posisi</label>
+                        <input type="text" name="posisi" class="form-control form-control-solid" placeholder="Cari posisi" value="<?= esc($filters['posisi'] ?? '') ?>">
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <button type="submit" class="btn btn-primary me-2">Filter</button>
+                        <a href="<?= site_url('admin/data-lowongan') ?>" class="btn btn-light">Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card mb-5 mb-xl-8">
         <div class="card-header border-0 pt-5">
             <h3 class="card-title align-items-start flex-column">
@@ -51,6 +72,10 @@
                                             <input type="text" class="form-control form-control-solid" name="posisi" placeholder="Contoh: Staff IT" required />
                                         </div>
                                         <div class="d-flex flex-column mb-8 fv-row">
+                                            <label class="fs-6 fw-semibold mb-2"><span class="required">Gaji</span></label>
+                                            <input type="text" class="form-control form-control-solid" id="gaji" name="gaji" placeholder="Rp. 5.000.000" />
+                                        </div>
+                                        <div class=" d-flex flex-column mb-8 fv-row">
                                             <label class="fs-6 fw-semibold mb-2"><span class="required">Jenis Pekerjaan</span></label>
                                             <select class="form-control form-control-solid" name="jenis_pekerjaan" required>
                                                 <option value="">-- Pilih Jenis --</option>
@@ -162,6 +187,10 @@
                                         <div class="d-flex flex-column mb-8 fv-row">
                                             <label class="fs-6 fw-semibold mb-2"><span class="required">Posisi</span></label>
                                             <input type="text" class="form-control form-control-solid" name="posisi" id="editPosisi" required />
+                                        </div>
+                                        <div class="d-flex flex-column mb-8 fv-row">
+                                            <label class="fs-6 fw-semibold mb-2"><span class="required">Gaji</span></label>
+                                            <input type="text" class="form-control form-control-solid" name="gaji" id="editGaji" required />
                                         </div>
                                         <div class="d-flex flex-column mb-8 fv-row">
                                             <label class="fs-6 fw-semibold mb-2"><span class="required">Jenis Pekerjaan</span></label>
@@ -376,6 +405,7 @@
                                                 data-id="<?= $item['id'] ?>"
                                                 data-id_perusahaan="<?= $item['id_perusahaan'] ?>"
                                                 data-posisi="<?= esc($item['posisi']) ?>"
+                                                data-gaji="<?= esc($item['gaji']) ?>"
                                                 data-jenis_pekerjaan="<?= $item['jenis_pekerjaan'] ?>"
                                                 data-lokasi_kerja="<?= esc($item['lokasi_kerja'] ?? '') ?>"
                                                 data-batas_lamaran="<?= $item['batas_lamaran'] ?? '' ?>"
@@ -443,6 +473,7 @@
 
         $('#editIdPerusahaan').val(btn.data('id_perusahaan'));
         $('#editPosisi').val(btn.data('posisi'));
+        $('#editGaji').val(btn.data('gaji'));
         $('#editJenisPekerjaan').val(btn.data('jenis_pekerjaan'));
         $('#editLokasiKerja').val(btn.data('lokasi_kerja'));
         $('#editBatasLamaran').val(btn.data('batas_lamaran'));
@@ -463,6 +494,60 @@
 
         const actionTemplate = form.data('action-template');
         form.attr('action', actionTemplate.replace(':id', btn.data('id')));
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const input = document.getElementById('gaji');
+        if (!input) return;
+
+        function formatRupiah(angka) {
+            // ambil hanya angka
+            let number_string = angka.replace(/[^,\d]/g, '').toString();
+
+            let split = number_string.split(',');
+            let sisa = split[0].length % 3;
+            let rupiah = split[0].substr(0, sisa);
+            let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                let separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            return rupiah ? 'Rp ' + rupiah : '';
+        }
+
+        input.addEventListener('input', function(e) {
+            input.value = formatRupiah(this.value);
+        });
+
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const input = document.getElementById('editGaji');
+        if (!input) return;
+
+        function formatRupiah(angka) {
+            // ambil hanya angka
+            let number_string = angka.replace(/[^,\d]/g, '').toString();
+
+            let split = number_string.split(',');
+            let sisa = split[0].length % 3;
+            let rupiah = split[0].substr(0, sisa);
+            let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                let separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            return rupiah ? 'Rp ' + rupiah : '';
+        }
+
+        input.addEventListener('input', function(e) {
+            input.value = formatRupiah(this.value);
+        });
+
     });
 </script>
 <?php $this->endSection() ?>

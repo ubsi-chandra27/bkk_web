@@ -27,7 +27,31 @@
     <script src="<?= base_url('assets/plugins/global/plugins.bundle.js') ?>"></script>
     <script src="<?= base_url('assets/js/scripts.bundle.js') ?>"></script>
     <script src="<?= base_url('assets/js/custom/authentication/sign-in/general.js') ?>"></script>
-    <script src="<?= base_url('assets/js/custom/authentication/sign-up/general.js') ?>"></script>
+    <!-- <script src="<?= base_url('assets/js/custom/authentication/sign-up/general.js') ?>"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            <?php if (session()->getFlashdata('success')): ?>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '<?= session()->getFlashdata('success') ?>',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            <?php endif; ?>
+
+            <?php if (session()->getFlashdata('error')): ?>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '<?= session()->getFlashdata('error') ?>',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            <?php endif; ?>
+        });
+    </script>
     <?= $this->renderSection('scripts') ?>
 </body>
 

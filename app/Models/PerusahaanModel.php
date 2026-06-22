@@ -38,10 +38,44 @@ class PerusahaanModel extends Model
 
 
     /**
+     * Get active companies with details for dashboard (limit)
+     */
+    public function getPerusahaanAktifDashboard(int $limit = 5): array
+    {
+        return $this->db->table('tb_perusahaan tp')
+            ->select('tp.id, tp.nama_perusahaan, tp.logo, COUNT(tl.id) as jumlah_lowongan')
+            ->join('tb_lowongan tl', "tl.id_perusahaan = tp.id AND tl.status = 'aktif'", 'left')
+            ->where('tp.is_active', 1)
+            ->groupBy('tp.id')
+            ->orderBy('tp.created_at', 'DESC')
+            ->limit($limit)
+            ->get()->getResultArray();
+    }
+
+
+    /**
      * Hitung total perusahaan aktif (untuk statistik hero)
      */
     public function countAktif(): int
     {
         return $this->where('is_active', 1)->countAllResults();
+    }
+
+    /**
+     * Get new companies count for today
+     */
+    public function getTodayNewCompanyCount(): int
+    {
+        return $this->where('DATE(created_at)', date('Y-m-d'))
+                    ->countAllResults();
+    }
+
+    /**
+     * Get new companies count from last month
+     */
+    public function getLastMonthNewCompanyCount(): int
+    {
+        return $this->where('DATE_FORMAT(created_at, "%Y-%m")', date('Y-m', strtotime('last month')))
+                    ->countAllResults();
     }
 }

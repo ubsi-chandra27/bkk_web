@@ -3,10 +3,14 @@
 namespace App\Controllers\admin;
 
 use App\Controllers\BaseController;
+use App\Libraries\ExportAlumniExcel;
+use App\Models\AngkatanModel;
 use App\Models\TracerModel;
 use App\Models\AlumniModel;
+use App\Models\JurusanModel;
 use App\Models\PelamarModel;
 use App\Models\UserModel;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class DataTracerController extends BaseController
 {
@@ -25,11 +29,55 @@ class DataTracerController extends BaseController
 
     public function index()
     {
+        $filters = [
+            'jurusan' => $this->request->getGet('jurusan'),
+            'angkatan' => $this->request->getGet('angkatan'),
+            'aktivitas' => $this->request->getGet('aktivitas'),
+        ];
+
         $data = [
-            'tracers' => $this->getTracerData(),
+            'tracers' => $this->tracerModel->getFiltered($filters),
+            'filters' => $filters,
+            'jurusanList' => $this->tracerModel->getFilterJurusanOptions(),
+            'angkatanList' => $this->tracerModel->getFilterAngkatanOptions(),
+            'aktivitasList' => $this->tracerModel->getFilterAktivitasOptions(),
         ];
 
         return view('admin/data_tracer/index', $data);
+    }
+
+    public function exportExcel()
+    {
+        $filters = [
+            'id_jurusan' => $this->request->getGet('id_jurusan'),
+            'id_angkatan' => $this->request->getGet('id_angkatan'),
+            'id_aktivitas' => $this->request->getGet('id_aktivitas'),
+        ];
+
+        $jurusanModel = new JurusanModel();
+        $angkatanModel = new AngkatanModel();
+
+        $jurusanList = $jurusanModel->orderBy('kompetensi_keahlian', 'ASC')->findAll();
+        $angkatanList = $angkatanModel->orderBy('tahun', 'ASC')->findAll();
+        $exportData = $this->tracerModel->getExportData($filters);
+
+        $spreadsheet = (new ExportAlumniExcel())->generate($exportData, $filters, $jurusanList, $angkatanList);
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'laporan_alumni_' . date('Ymd_His') . '.xlsx';
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        ob_start();
+        $writer->save('php://output');
+        $contents = (string) ob_get_clean();
+
+        return $this->response
+            ->setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setHeader('Cache-Control', 'max-age=0')
+            ->setBody($contents);
     }
 
     public function update($id)

@@ -15,7 +15,7 @@ class GuestFilter implements FilterInterface
 
             return match ($role) {
                 1, 2 => redirect()->to('/dashboard'),
-                3 => redirect()->to('/'),
+                3 => redirect()->to('/dashboard'),
                 4, 5    => redirect()->to('/'),
                 default => redirect()->to('/'),
             };

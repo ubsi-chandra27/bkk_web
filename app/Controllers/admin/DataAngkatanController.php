@@ -4,6 +4,7 @@ namespace App\Controllers\admin;
 
 use App\Controllers\BaseController;
 use App\Models\AngkatanModel;
+use App\Models\AlumniModel;
 
 class DataAngkatanController extends BaseController
 {
@@ -61,8 +62,28 @@ class DataAngkatanController extends BaseController
     public function delete($id)
     {
         $angkatanModel = new AngkatanModel();
-        $angkatanModel->delete($id);
+        $alumniModel = new AlumniModel();
+        $angkatan = $angkatanModel->find($id);
 
-        return redirect()->to('/admin/data-angkatan')->with('success', 'Data angkatan berhasil dihapus');
+        if (!$angkatan) {
+            return redirect()->to('/admin/data-angkatan')
+                ->with('error', 'Data angkatan tidak ditemukan.');
+        }
+
+        try {
+            // Set NULL dulu di tb_alumni
+            $alumniModel->where('id_angkatan', $id)
+                ->set(['id_angkatan' => null])
+                ->update();
+
+            // Baru hapus angkatan
+            $angkatanModel->delete($id);
+
+            return redirect()->to('/admin/data-angkatan')
+                ->with('success', 'Angkatan berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->to('/admin/data-angkatan')
+                ->with('error', 'Gagal menghapus data: ' . $e->getMessage());
+        }
     }
 }

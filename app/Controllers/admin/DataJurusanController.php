@@ -4,6 +4,8 @@ namespace App\Controllers\admin;
 
 use App\Controllers\BaseController;
 use App\Models\JurusanModel;
+use App\Models\AlumniModel;
+use App\Models\LowonganJurusanModel;
 
 class DataJurusanController extends BaseController
 {
@@ -65,8 +67,31 @@ class DataJurusanController extends BaseController
     public function delete($id)
     {
         $jurusanModel = new JurusanModel();
-        $jurusanModel->delete($id);
+        $alumniModel = new AlumniModel();
+        $lowonganJurusanModel = new LowonganJurusanModel();
+        $jurusan = $jurusanModel->find($id);
 
-        return redirect()->to('/admin/data-jurusan')->with('success', 'Data jurusan berhasil dihapus');
+        if (!$jurusan) {
+            return redirect()->to('/admin/data-jurusan')->with('error', 'Data jurusan tidak ditemukan');
+        }
+        try {
+            // Set NULL dulu di tb_alumni
+            $alumniModel->where('id_jurusan', $id)
+                ->set(['id_jurusan' => null])
+                ->update();
+
+            // Set NULL dulu di tb_lowongan_jurusan
+            $lowonganJurusanModel->where('id_jurusan', $id)
+                ->delete();
+
+            // Baru hapus jurusan
+            $jurusanModel->delete($id);
+
+            return redirect()->to('/admin/data-jurusan')
+                ->with('success', 'Jurusan berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->to('/admin/data-jurusan')
+                ->with('error', 'Gagal menghapus data: ' . $e->getMessage());
+        }
     }
 }

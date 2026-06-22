@@ -7,7 +7,7 @@
         <!--begin::Content-->
         <div class="d-flex flex-center flex-column flex-column-fluid p-10 pb-lg-20">
             <!--begin::Wrapper-->
-            <div class="w-lg-600px bg-body rounded shadow-sm p-10 p-lg-15 mx-auto">
+            <div class="w-lg-800px bg-body rounded shadow-sm p-10 p-lg-15 mx-auto">
                 <!--begin::Form-->
                 <form class="form w-100" method="POST" action="<?= site_url('register') ?>" id="kt_sign_up_form">
                     <?= csrf_field() ?>
@@ -26,32 +26,6 @@
                         <div class="border-bottom border-gray-300 mw-50 w-100"></div>
                     </div>
                     <!--end::Separator-->
-
-                    <!--begin::Alert-->
-                    <?php if (session()->getFlashdata('error')): ?>
-                        <div class="alert alert-danger d-flex align-items-center p-5 mb-10">
-                            <i class="ki-duotone ki-shield-cross fs-2hx text-danger me-4">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                            </i>
-                            <div class="d-flex flex-column">
-                                <span><?= session()->getFlashdata('error') ?></span>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if (session()->getFlashdata('success')): ?>
-                        <div class="alert alert-success d-flex align-items-center p-5 mb-10">
-                            <i class="ki-duotone ki-shield-tick fs-2hx text-success me-4">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                            </i>
-                            <div class="d-flex flex-column">
-                                <span><?= session()->getFlashdata('success') ?></span>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-                    <!--end::Alert-->
 
                     <!--begin::Input group-->
                     <div class="fv-row mb-7">
@@ -101,6 +75,65 @@
                     </div>
                     <!--end::Input group-->
 
+                    <?php $isAlumni = old('role') === 'pelamar_alumni'; ?>
+                    <div id="alumni_fields" class="<?= $isAlumni ? '' : 'd-none' ?>">
+                        <div class="row g-6 mb-7">
+                            <div class="col-md-6">
+                                <label class="form-label fs-6 fw-bolder text-dark">Jurusan</label>
+                                <select class="form-control form-control-lg form-control-solid alumni-required"
+                                    name="id_jurusan"
+                                    <?= $isAlumni ? 'required' : '' ?>>
+                                    <option value="">Pilih jurusan</option>
+                                    <?php foreach (($jurusans ?? []) as $jurusan): ?>
+                                        <option value="<?= esc($jurusan['id']) ?>" <?= old('id_jurusan') == $jurusan['id'] ? 'selected' : '' ?>>
+                                            <?= esc($jurusan['kompetensi_keahlian']) ?><?= !empty($jurusan['akronim']) ? ' (' . esc($jurusan['akronim']) . ')' : '' ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fs-6 fw-bolder text-dark">Angkatan</label>
+                                <select class="form-control form-control-lg form-control-solid alumni-required"
+                                    name="id_angkatan"
+                                    <?= $isAlumni ? 'required' : '' ?>>
+                                    <option value="">Pilih angkatan</option>
+                                    <?php foreach (($angkatans ?? []) as $angkatan): ?>
+                                        <option value="<?= esc($angkatan['id']) ?>" <?= old('id_angkatan') == $angkatan['id'] ? 'selected' : '' ?>>
+                                            <?= esc($angkatan['tahun']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fs-6 fw-bolder text-dark">NIS</label>
+                                <input class="form-control form-control-lg form-control-solid alumni-required"
+                                    type="text"
+                                    name="nis"
+                                    value="<?= esc(old('nis')) ?>"
+                                    autocomplete="off"
+                                    <?= $isAlumni ? 'required' : '' ?> />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fs-6 fw-bolder text-dark">NISN</label>
+                                <input class="form-control form-control-lg form-control-solid alumni-required"
+                                    type="text"
+                                    name="nisn"
+                                    value="<?= esc(old('nisn')) ?>"
+                                    autocomplete="off"
+                                    <?= $isAlumni ? 'required' : '' ?> />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fs-6 fw-bolder text-dark">No Ijazah</label>
+                                <input class="form-control form-control-lg form-control-solid alumni-required"
+                                    type="text"
+                                    name="no_ijazah"
+                                    value="<?= esc(old('no_ijazah')) ?>"
+                                    autocomplete="off"
+                                    <?= $isAlumni ? 'required' : '' ?> />
+                            </div>
+                        </div>
+                    </div>
+
                     <!--begin::Input group-->
                     <div class="fv-row mb-7" data-kt-password-meter="true">
                         <div class="d-flex flex-stack mb-2">
@@ -110,12 +143,28 @@
                             <input class="form-control form-control-lg form-control-solid"
                                 type="password"
                                 name="password"
+                                id="registerPassword"
+                                pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}"
+                                title="Password harus minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan simbol."
                                 autocomplete="off"
                                 required />
                             <span class="btn btn-sm btn-icon position-absolute translate-middle top-50 end-0 me-n2" data-kt-password-meter-control="visibility">
                                 <i class="bi bi-eye-slash fs-2"></i>
                                 <i class="bi bi-eye fs-2 d-none"></i>
                             </span>
+                        </div>
+                        <div class="password-strength-meter">
+                            <div class="strength-bar">
+                                <div class="strength-progress" id="strengthProgress"></div>
+                            </div>
+                            <div class="strength-text mt-2" id="strengthText">Kekuatan password: <span class="text-muted">Belum diisi</span></div>
+                            <ul class="password-requirements list-unstyled mt-2">
+                                <li id="req-length" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Minimal 8 karakter</li>
+                                <li id="req-uppercase" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung huruf besar (A-Z)</li>
+                                <li id="req-lowercase" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung huruf kecil (a-z)</li>
+                                <li id="req-number" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung angka (0-9)</li>
+                                <li id="req-symbol" class="text-muted fs-7"><i class="bi bi-x-circle me-1"></i> Mengandung karakter simbol (!@#$%^&* dll)</li>
+                            </ul>
                         </div>
                     </div>
                     <!--end::Input group-->
@@ -169,4 +218,106 @@
     <!--end::Authentication - Sign-up-->
 </div>
 <!--end::Main-->
+<style>
+.password-strength-meter {
+    margin-top: 10px;
+}
+.strength-bar {
+    height: 6px;
+    background-color: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.strength-progress {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+.strength-text .text-success { color: #50cd89; }
+.strength-text .text-warning { color: #ffc107; }
+.strength-text .text-danger { color: #f1416c; }
+.password-requirements li {
+    transition: color 0.3s ease;
+}
+.password-requirements li.text-success {
+    color: #50cd89 !important;
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const alumniFields = document.getElementById('alumni_fields');
+    const roleInputs = document.querySelectorAll('input[name="role"]');
+    const requiredInputs = document.querySelectorAll('.alumni-required');
+
+    function syncAlumniFields() {
+        const selectedRole = document.querySelector('input[name="role"]:checked');
+        const isAlumni = selectedRole && selectedRole.value === 'pelamar_alumni';
+
+        alumniFields.classList.toggle('d-none', !isAlumni);
+        requiredInputs.forEach(function (input) {
+            input.required = isAlumni;
+        });
+    }
+
+    roleInputs.forEach(function (input) {
+        input.addEventListener('change', syncAlumniFields);
+    });
+    syncAlumniFields();
+});
+
+function initPasswordMeter(inputId, progressId, textId, reqIds) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    const progress = document.getElementById(progressId);
+    const textEl = document.getElementById(textId);
+
+    input.addEventListener('input', function () {
+        const password = this.value;
+        let score = 0;
+
+        if (password.length >= 8) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[a-z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+
+        const widths = [0, 20, 40, 60, 80, 100];
+        const colors = ['#e9ecef', '#f1416c', '#f1416c', '#ffc107', '#ffc107', '#50cd89'];
+        const labels = ['Belum diisi', 'Lemah', 'Lemah', 'Sedang', 'Sedang', 'Kuat'];
+        const labelClasses = ['text-muted', 'text-danger', 'text-danger', 'text-warning', 'text-warning', 'text-success'];
+
+        progress.style.width = widths[score] + '%';
+        progress.style.backgroundColor = colors[score];
+
+        textEl.innerHTML = 'Kekuatan password: <span class="' + labelClasses[score] + '">' + labels[score] + '</span>';
+
+        reqIds.forEach(function (id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            let met = false;
+            if (id.includes('length') && password.length >= 8) met = true;
+            else if (id.includes('uppercase') && /[A-Z]/.test(password)) met = true;
+            else if (id.includes('lowercase') && /[a-z]/.test(password)) met = true;
+            else if (id.includes('number') && /[0-9]/.test(password)) met = true;
+            else if (id.includes('symbol') && /[^A-Za-z0-9]/.test(password)) met = true;
+
+            if (met) {
+                el.classList.remove('text-muted');
+                el.classList.add('text-success');
+                el.querySelector('i').className = 'bi bi-check-circle me-1';
+            } else {
+                el.classList.remove('text-success');
+                el.classList.add('text-muted');
+                el.querySelector('i').className = 'bi bi-x-circle me-1';
+            }
+        });
+    });
+}
+
+initPasswordMeter('registerPassword', 'strengthProgress', 'strengthText', [
+    'req-length', 'req-uppercase', 'req-lowercase', 'req-number', 'req-symbol'
+]);
+</script>
 <?php $this->endSection() ?>
