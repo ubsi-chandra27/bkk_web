@@ -1,5 +1,6 @@
 <?= $this->extend('auth/app') ?>
 <?php $this->section('content') ?>
+<?php $googleAuth = config('GoogleAuth'); ?>
 <!--begin::Main-->
 <div class="d-flex flex-column flex-root">
     <!--begin::Authentication - Sign-up -->
@@ -19,10 +20,30 @@
                         </div>
                     </div>
                     <!--end::Heading-->
+
+                    <?php if (session()->getFlashdata('success')): ?>
+                        <div class="alert alert-success mb-8" role="alert">
+                            <?= esc(session()->getFlashdata('success')) ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (session()->getFlashdata('error')): ?>
+                        <div class="alert alert-danger mb-8" role="alert">
+                            <?= esc(session()->getFlashdata('error')) ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($googleAuth->isConfigured()): ?>
+                        <a href="<?= site_url('auth/google') ?>" class="btn btn-lg btn-light-primary w-100 mb-7">
+                            <i class="bi bi-google fs-3 me-2"></i>
+                            Daftar sebagai Pelamar Umum dengan Google
+                        </a>
+                    <?php endif; ?>
+
                     <!--begin::Separator-->
                     <div class="d-flex align-items-center mb-10">
                         <div class="border-bottom border-gray-300 mw-50 w-100"></div>
-                        <span class="fw-bold text-gray-400 fs-7 mx-2"></span>
+                        <span class="fw-bold text-gray-400 fs-7 mx-2"><?= $googleAuth->isConfigured() ? 'atau' : '' ?></span>
                         <div class="border-bottom border-gray-300 mw-50 w-100"></div>
                     </div>
                     <!--end::Separator-->

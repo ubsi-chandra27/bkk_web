@@ -298,6 +298,7 @@
                             <th class="w-10px ps-4">No</th>
                             <th class="min-w-120px">Nama</th>
                             <th class="min-w-100px">Email</th>
+                            <th class="min-w-90px">Metode</th>
                             <th class="min-w-80px">Jenis Pelamar</th>
                             <th class="min-w-50px">Status Akun</th>
                             <th class="min-w-140px">Verifikasi Email</th>
@@ -322,6 +323,19 @@
                                         </div>
                                     </td>
                                     <td><?= esc($item['email'] ?? '-') ?></td>
+                                    <td>
+                                        <?php
+                                        $authProvider = strtolower((string) ($item['auth_provider'] ?? 'local'));
+                                        $isGoogleAccount = in_array($authProvider, ['google', 'local_google'], true) || !empty($item['google_sub']);
+                                        ?>
+                                        <?php if ($isGoogleAccount): ?>
+                                            <span class="badge badge-light-primary">
+                                                <i class="bi bi-google me-1"></i> Google
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="badge badge-light-secondary">Manual</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="text-capitalize">
                                         <?php
                                         $jenisLabel = esc($item['jenis_pelamar'] ?? '-');
@@ -424,7 +438,7 @@
                             <?php endforeach ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="8" class="text-center py-10">
+                                <td colspan="9" class="text-center py-10">
                                     <div class="text-gray-600 fs-5 fw-semibold">Belum ada data Pelamar</div>
                                 </td>
                             </tr>

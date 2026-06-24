@@ -30,6 +30,8 @@ $routes->post('reset-password/(:segment)', 'AuthController::processResetPassword
 $routes->group('', ['filter' => 'guest'], function ($routes) {
     $routes->get('login', 'AuthController::loginForm');
     $routes->get('register', 'AuthController::registerForm');
+    $routes->get('auth/google', 'AuthController::redirectToGoogle');
+    $routes->get('auth/google/callback', 'AuthController::handleGoogleCallback');
 });
 
 // ===== PROFIL PELAMAR (role 4, 5) =====

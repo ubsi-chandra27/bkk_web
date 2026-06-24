@@ -39,7 +39,7 @@ class PelamarModel extends Model
 
     public function getPelamarWithUser()
     {
-        return $this->select('tb_pelamar.*, tb_users.nama, tb_users.email, tb_users.is_active, tb_users.is_verified')
+        return $this->select('tb_pelamar.*, tb_users.nama, tb_users.email, tb_users.is_active, tb_users.is_verified, tb_users.auth_provider, tb_users.google_sub')
             ->join('tb_users', 'tb_users.id = tb_pelamar.id_user')
             ->findAll();
     }
