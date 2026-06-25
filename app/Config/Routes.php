@@ -47,24 +47,24 @@ $routes->delete('profil/riwayat-kerja/(:num)', 'ProfilController::destroyRiwayat
 
 // ===== ADMIN DUDI (role 3) =====
 $routes->group('admindudi', ['filter' => 'auth:3'], function ($routes) {
-    $routes->get('profil-perusahaan', 'Admin\ProfilPerusahaanController::index');
-    $routes->post('profil-perusahaan/update', 'Admin\ProfilPerusahaanController::update');
+    $routes->get('profil-perusahaan', 'admin\ProfilPerusahaanController::index');
+    $routes->post('profil-perusahaan/update', 'admin\ProfilPerusahaanController::update');
 });
 
 // ===== ADMIN (role 1, 2, 3) =====
 $routes->group('', ['filter' => 'auth:1,2,3'], function ($routes) {
 
     $routes->get('dashboard', 'admin\DashboardController::index');
-    $routes->get('admin/profil-saya', 'Admin\ProfilSayaController::index');
-    $routes->get('admin/profil-saya/edit', 'Admin\ProfilSayaController::edit');
-    $routes->post('admin/profil-saya/update', 'Admin\ProfilSayaController::update');
+    $routes->get('admin/profil-saya', 'admin\ProfilSayaController::index');
+    $routes->get('admin/profil-saya/edit', 'admin\ProfilSayaController::edit');
+    $routes->post('admin/profil-saya/update', 'admin\ProfilSayaController::update');
 
     // Data Admin
     $routes->get('admin/data-admin', 'admin\DataAdminController::index');
     $routes->post('admin/data-admin', 'admin\DataAdminController::store');
-    $routes->get('admin/data-admin/(:num)/profil', 'Admin\DataAdminController::profil/$1');
-    $routes->get('admin/data-admin/(:num)/edit-profil', 'Admin\DataAdminController::editProfil/$1');
-    $routes->post('admin/data-admin/(:num)/update-profil', 'Admin\DataAdminController::updateProfil/$1');
+    $routes->get('admin/data-admin/(:num)/profil', 'admin\DataAdminController::profil/$1');
+    $routes->get('admin/data-admin/(:num)/edit-profil', 'admin\DataAdminController::editProfil/$1');
+    $routes->post('admin/data-admin/(:num)/update-profil', 'admin\DataAdminController::updateProfil/$1');
     $routes->post('admin/data-admin/update/(:num)', 'admin\DataAdminController::update/$1');
     $routes->get('admin/data-admin/delete/(:num)', 'admin\DataAdminController::delete/$1');
 
@@ -74,15 +74,15 @@ $routes->group('', ['filter' => 'auth:1,2,3'], function ($routes) {
     $routes->post('admin/data-pelamar/update/(:num)', 'admin\DataPelamarController::update/$1');
     $routes->post('admin/data-pelamar/update-status/(:num)', 'admin\DataPelamarController::updateStatusPendaftaran/$1');
     $routes->get('admin/data-pelamar/delete/(:num)', 'admin\DataPelamarController::delete/$1');
-    $routes->get('admin/data-pelamar/profil/(:num)', 'Admin\ProfilPelamarController::show/$1');
-    $routes->get('admin/data-pelamar/profil/(:num)/edit', 'Admin\ProfilPelamarController::edit/$1');
-    $routes->post('admin/data-pelamar/profil/(:num)/update', 'Admin\ProfilPelamarController::update/$1');
-    $routes->post('admin/data-pelamar/profil/(:num)/update-tracer', 'Admin\ProfilPelamarController::updateTracer/$1');
-    $routes->post('admin/data-pelamar/profil/(:num)/upload-berkas', 'Admin\ProfilPelamarController::uploadBerkas/$1');
-    $routes->get('admin/data-pelamar/profil/(:num)/riwayat-kerja', 'Admin\ProfilPelamarController::riwayatKerja/$1');
-    $routes->post('admin/data-pelamar/profil/(:num)/riwayat-kerja', 'Admin\ProfilPelamarController::storeRiwayatKerja/$1');
-    $routes->put('admin/data-pelamar/profil/(:num)/riwayat-kerja/(:num)', 'Admin\ProfilPelamarController::updateRiwayatKerja/$1/$2');
-    $routes->delete('admin/data-pelamar/profil/(:num)/riwayat-kerja/(:num)', 'Admin\ProfilPelamarController::destroyRiwayatKerja/$1/$2');
+    $routes->get('admin/data-pelamar/profil/(:num)', 'admin\ProfilPelamarController::show/$1');
+    $routes->get('admin/data-pelamar/profil/(:num)/edit', 'admin\ProfilPelamarController::edit/$1');
+    $routes->post('admin/data-pelamar/profil/(:num)/update', 'admin\ProfilPelamarController::update/$1');
+    $routes->post('admin/data-pelamar/profil/(:num)/update-tracer', 'admin\ProfilPelamarController::updateTracer/$1');
+    $routes->post('admin/data-pelamar/profil/(:num)/upload-berkas', 'admin\ProfilPelamarController::uploadBerkas/$1');
+    $routes->get('admin/data-pelamar/profil/(:num)/riwayat-kerja', 'admin\ProfilPelamarController::riwayatKerja/$1');
+    $routes->post('admin/data-pelamar/profil/(:num)/riwayat-kerja', 'admin\ProfilPelamarController::storeRiwayatKerja/$1');
+    $routes->put('admin/data-pelamar/profil/(:num)/riwayat-kerja/(:num)', 'admin\ProfilPelamarController::updateRiwayatKerja/$1/$2');
+    $routes->delete('admin/data-pelamar/profil/(:num)/riwayat-kerja/(:num)', 'admin\ProfilPelamarController::destroyRiwayatKerja/$1/$2');
 
     // Data Angkatan
     $routes->get('admin/data-angkatan', 'admin\DataAngkatanController::index');
@@ -121,17 +121,17 @@ $routes->group('', ['filter' => 'auth:1,2,3'], function ($routes) {
     $routes->post('admin/data-kerjasama/delete/(:num)', 'admin\DataKerjasamaController::delete/$1');
 
     // Data Lowongan
-    $routes->get('admin/data-lowongan', 'Admin\DataLowonganController::index');
-    $routes->post('admin/data-lowongan/store', 'Admin\DataLowonganController::store');
-    $routes->post('admin/data-lowongan/update/(:num)', 'Admin\DataLowonganController::update/$1');
-    $routes->get('admin/data-lowongan/delete/(:num)', 'Admin\DataLowonganController::delete/$1');
-    $routes->get('admin/data-lowongan/show/(:num)', 'Admin\DataLowonganController::show/$1');
+    $routes->get('admin/data-lowongan', 'admin\DataLowonganController::index');
+    $routes->post('admin/data-lowongan/store', 'admin\DataLowonganController::store');
+    $routes->post('admin/data-lowongan/update/(:num)', 'admin\DataLowonganController::update/$1');
+    $routes->get('admin/data-lowongan/delete/(:num)', 'admin\DataLowonganController::delete/$1');
+    $routes->get('admin/data-lowongan/show/(:num)', 'admin\DataLowonganController::show/$1');
 
     // Data Lamaran
     $routes->get('admin/data-lamaran', 'admin\DataLamaranController::index');
     $routes->post('admin/data-lamaran/update/(:num)', 'admin\DataLamaranController::update/$1');
     $routes->get('admin/data-lamaran/delete/(:num)', 'admin\DataLamaranController::delete/$1');
-    $routes->get('admin/riwayat-lamaran', 'Admin\DataLamaranController::riwayat');
+    $routes->get('admin/riwayat-lamaran', 'admin\DataLamaranController::riwayat');
 
     // Data Tracer Alumni
     $routes->get('admin/data-tracer', 'admin\DataTracerController::index');
