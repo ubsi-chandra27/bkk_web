@@ -6,7 +6,7 @@
         <div class="card-header border-0 pt-5">
             <h3 class="card-title align-items-start flex-column">
                 <span class="card-label fw-bolder fs-3 mb-1">Data Kerja Sama</span>
-                <span class="text-muted mt-1 fw-semibold fs-7">Total <?= count($kerjasamas ?? []) ?> Kerja Sama</span>
+                <span class="text-muted mt-1 fw-semibold fs-7">Total <?= count($kerjasama ?? []) ?> Kerja Sama</span>
             </h3>
 
             <!-- ===== Modal Tambah Kerja Sama ===== -->
@@ -24,7 +24,7 @@
                             </div>
                         </div>
                         <div class="modal-body scroll-y px-10 px-lg-15 pt-0 pb-15">
-                            <form id="kt_modal_add_kerjasama_form" action="<?= site_url('admin/data-kerjasama') ?>" method="POST" class="form confirm-submit" enctype="multipart/form-data" data-confirm-title="Tambah Kerja Sama" data-confirm-text="Apakah Anda yakin ingin menambah kerja sama baru?">
+                            <form id="kt_modal_add_kerjasama_form" action="<?= site_url('admin/data-kerjasama/store') ?>" method="POST" class="form confirm-submit" enctype="multipart/form-data" data-confirm-title="Tambah Kerja Sama" data-confirm-text="Apakah Anda yakin ingin menambah kerja sama baru?">
                                 <?= csrf_field() ?>
                                 <div class="mb-13 text-center">
                                     <h1 class="mb-3">Tambah Kerja Sama Baru</h1>
@@ -61,10 +61,10 @@
                     </div>
                 </div>
             </div>
-            <!-- ===== /Modal Tambah Pelamar ===== -->
+            <!-- ===== /Modal Tambah Kerja Sama ===== -->
 
-            <!-- ===== Modal Edit Pelamar ===== -->
-            <div class="modal fade" id="editAngkatanModal" tabindex="-1" aria-labelledby="editAngkatanModalLabel" aria-hidden="true">
+            <!-- ===== Modal Edit Kerja Sama ===== -->
+            <div class="modal fade" id="editKerjasamaModal" tabindex="-1" aria-labelledby="editKerjasamaModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered mw-650px">
                     <div class="modal-content rounded">
                         <!--begin::Modal header-->
@@ -73,7 +73,7 @@
                                 <span class="svg-icon svg-icon-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                         <rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor" />
-                                        <rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor" />
+                                        <rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)l" fill="currentColor" />
                                     </svg>
                                 </span>
                             </div>
@@ -109,7 +109,7 @@
                     <!--end::modal-content-->
                 </div>
             </div>
-            <!-- ===== /Modal Edit Pelamar ===== -->
+            <!-- ===== /Modal Edit Kerja Sama ===== -->
 
         </div>
         <!--end::card-header-->
@@ -149,7 +149,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (count($kerjasama) > 0): ?>
+                        <?php if (!empty($kerjasama)): ?>
                             <?php $no = 1;
                             foreach ($kerjasama as $item): ?>
                                 <tr>
@@ -166,7 +166,6 @@
                                             data-bs-target="#editKerjasamaModal"
                                             data-id="<?= $item['id'] ?>"
                                             data-nama-kerjasama="<?= esc($item['nama_kerjasama']) ?>"
-
                                             title="Edit">
                                             <span class="svg-icon svg-icon-3">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -194,7 +193,7 @@
                         <?php else: ?>
                             <tr>
                                 <td colspan="3" class="text-center py-10">
-                                    <div class="text-gray-600 fs-5 fw-semibold">Belum ada data Angkatan</div>
+                                    <div class="text-gray-600 fs-5 fw-semibold">Belum ada data Kerja Sama</div>
                                 </td>
                             </tr>
                         <?php endif ?>
@@ -225,8 +224,10 @@
         const modal = $('#editKerjasamaModal');
         const form = modal.find('#kt_modal_edit_kerjasama_form');
         const id = button.data('id');
+        // jQuery data() converts data-nama-kerjasama -> namaKerjasama
+        const nama = button.data('namaKerjasama');
 
-        modal.find('#editKerjasama').val(button.data('data-nama-kerjasama'));
+        modal.find('#editKerjasama').val(nama);
 
         const actionTemplate = form.data('action-template');
         form.attr('action', actionTemplate.replace(':id', id));
